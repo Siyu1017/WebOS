@@ -31,12 +31,7 @@
 	}
 }
 
-.loading {
-	transform: translateY(-50%);
-	height: 30px;
-}
-
-.loading-text {
+.webos-loading-text {
 	color: #fff;
 	padding: 0 0 15vh;
 	font-size: 150%;
@@ -60,7 +55,7 @@
 	animation: 2s linear 0s infinite normal none running loading-spinner;
 }
 
-.webos-loading-image,
+.webos-loading-text,
 .webos-loading-spinner {
 	opacity: 0;
 	animation: .2s linear .1s 1 normal forwards running show-loader;

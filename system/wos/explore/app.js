@@ -1,10 +1,11 @@
-(function () {
+(async function () {
     var explore_datas = {
         executing_apps: [],
     }
     var delay = (delayInms) => { return new Promise(resolve => setTimeout(resolve, delayInms)); };
     var System = {};
 
+    /*
     System.loadApp = function (app) {
         return new Promise(function (resolve, reject) {
             var script = document.createElement("script");
@@ -15,21 +16,22 @@
             };
         });
     }
+    */
 
-    System.loadEachApp = async function (curr, arr) {
-        System.loadApp(arr[curr]).then((loaded) => {
-            if (loaded == true) {
-                if (curr < arr.length - 1) {
-                    System.loadEachApp(curr += 1, arr);
-                }
-            }
-        })
+    System.loadApp = async function (curr = 0, arr) {
+        var script = document.createElement("script");
+        script.src = "./system/wos/" + arr[curr] + ".js";
+        document.head.appendChild(script);
+        script.onload = () => {
+            if (curr == arr.length - 1) return;
+            System.loadApp(curr + 1, arr);
+        }
     }
 
     System.loadSystemApps = (apps) => {
-        System.loadEachApp(0, apps)
+        System.loadApp(0, apps)
     }
-    window.onload = () => {
+    window.onload = async () => {
         var explore = new App(null, null, {
             showinbar: false,
             toolbar: false,
@@ -93,20 +95,14 @@
         }
         imgLoad("./application.png")
 
-        new Promise((resolve, reject) => {
-            try {
-                System.loadSystemApps(["time/app", "pkgmgr/app"]);
-            } catch (e) { }
-            resolve(true);
-        }).then(async (status) => {
-            if (status == true) {
-                // await delay(500)
-                $("#loading").classList.remove("active");
-                setTimeout(() => {
-                    $("#loading").remove();
-                }, 1000)
-            }
-        })
+        await System.loadApp(0, ["time/app", "pkgmgr/app"]);
+        (async (status) => {
+            await delay(500)
+            $("#loading").classList.remove("active");
+            setTimeout(() => {
+                $("#loading").remove();
+            }, 1000)
+        })()
     }
 
     window.System = System;
