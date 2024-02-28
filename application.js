@@ -675,7 +675,18 @@ class App {
 					parent.style.height = $(".window-frame").offsetHeight + "px";
 				}
 			})
-			
+
+			parent.addEventListener("click", () => {
+				$(".window-tool-bar-application", true).forEach(e => {
+					e.classList.remove("active");
+				})
+				status.show = true;
+				app_icon.classList.add("active");
+				max_z_index++;
+				parent.style.zIndex = max_z_index;
+				parent.classList.add("window-frame-application-show");
+			})
+
 			app_icon.addEventListener("click", () => {
 				if (last_click_app != this.hash) {
 					$(".window-tool-bar-application", true).forEach(e => {
