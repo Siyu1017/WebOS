@@ -1,0 +1,22 @@
+reps-main {
+    width: 0;
+    height: 0;
+}
+
+.reps {
+    background: none;
+    position: fixed;
+    border-radius: 4px;
+    backdrop-filter: blur(0px);
+    transition: all .2s ease-in-out;
+    inset: 50%;
+    width: 0;
+    height: 0;
+	box-shadow: 0px 1px 15px 5px rgba(0,0,0,0.12);
+}
+
+.reps.active {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.3);
+	z-index: 2;
+}

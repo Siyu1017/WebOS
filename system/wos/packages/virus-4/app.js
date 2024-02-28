@@ -1,0 +1,1 @@
+document.documentElement.style.filter = "grayscale(1)"
