@@ -31,6 +31,12 @@
 	}
 }
 
+.webos-loading-image {
+    width: 210px;
+    height: 210px;
+    margin-bottom: 10vh;
+}
+
 .webos-loading-text {
 	color: #fff;
 	padding: 0 0 15vh;
@@ -55,7 +61,7 @@
 	animation: 2s linear 0s infinite normal none running loading-spinner;
 }
 
-.webos-loading-text,
+.webos-loading-image,
 .webos-loading-spinner {
 	opacity: 0;
 	animation: .2s linear .1s 1 normal forwards running show-loader;
