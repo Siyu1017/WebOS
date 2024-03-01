@@ -4,6 +4,11 @@
     "scripts": ["browser/app"],
     "version": "1.0.0"
 }, {
+    "name": "Command",
+    "author": "WebOS, Siyu1017",
+    "scripts": ["packages/cmd/app"],
+    "version": "1.0.0"
+}, {
     "name": "Painter",
     "author": "WebOS, Siyu1017",
     "scripts": ["packages/painter/app"],

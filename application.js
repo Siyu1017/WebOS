@@ -543,7 +543,7 @@ class App {
 					parent.style.zIndex = max_z_index;
 					parent.classList.add("focus");
 				});
-	
+
 				__drag__.On("dragstart", (e) => {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "block";
@@ -559,12 +559,12 @@ class App {
 					parent.style.zIndex = max_z_index;
 					parent.classList.add("focus");
 				});
-	
+
 				__drag__.On("dragging", (e) => {
 					if (status.drag == false) return;
-	
+
 					status.app_position_side = null;
-	
+
 					if (settings.fullscreenable == true) {
 						$('[data-svg="unfull"]').classList.add("hide");
 						$('[data-svg="full"]').classList.remove("hide");
@@ -585,7 +585,7 @@ class App {
 					status.mouse_y = y;
 					status.last_x = parent.offsetLeft;
 					status.last_y = parent.offsetTop;
-	
+
 					__drag__.InArea($(".window-frame"), parent, (e) => {
 						if (e == false) {
 							$(".reps").style = "";
@@ -606,10 +606,10 @@ class App {
 								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", status.app_position_side = e, status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
 							}
 						}
-	
+
 					}, e);
 				});
-	
+
 				__drag__.On("dragend", () => {
 					if (status.drag == false) return;
 					if (status.app_position_side !== null) {
@@ -637,7 +637,7 @@ class App {
 						status.last_height = parent.scrollHeight;
 					}
 				})
-	
+
 				__drag__.On("dragout", () => {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "none";

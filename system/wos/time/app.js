@@ -9,7 +9,7 @@
 		toolbar: false
 	}).execute(`<div class="wos-time"><div class="wos-time-clock"></div></div>`);
 	app.elements.content.style = "padding: 10px;box-sizing: border-box;backdrop-filter: blur(10px);background: rgba(250, 253, 255, 0.91); height: 100%;";
-	app.elements.window.style = "display: none; width: fit-content; height: fit-content;box-shadow: 0px 1px 15px 5px rgba(0,0,0,0.12); bottom: 53px; right: 12px;";
+	app.elements.window.style = "display: none; width: fit-content; height: fit-content;box-shadow: 0px 1px 15px 5px rgba(0,0,0,0.12); bottom: 8px; right: 12px;";
 
 	var now = new Date(Date.now());
 
