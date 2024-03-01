@@ -15,6 +15,8 @@ body {
 }
 
 .window-frame {
+	position: relative;
+	z-index: 9;
 	width: 100%;
 	height: calc(100% - 45px);
 }
@@ -157,7 +159,7 @@ img.window-tool-bar-application-icon-image {
 	margin-left: 12px;
 }
 
-.window-tool-bar-application.active {
+.window-tool-bar-application.active, .window-tool-bar-application:hover {
 	background: rgba(255, 255, 255, .7);
 	border-radius: 4px;
 }

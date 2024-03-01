@@ -527,134 +527,136 @@ class App {
 				})
 			}
 
-			dragger(title).On("dragstart", (e) => {
-				$(".window-frame-application-content-mask", true).forEach(e => {
-					e.style.display = "block";
-				})
-				status.drag = true;
-				status.mouse_x = e.pageX;
-				status.mouse_y = e.pageY;
-				status.in_full_mode = false;
-				$(".window-frame-application", true).forEach(e => {
-					e.classList.remove("focus");
-				})
-				max_z_index++;
-				parent.style.zIndex = max_z_index;
-				parent.classList.add("focus");
-			});
-
-			__drag__.On("dragstart", (e) => {
-				$(".window-frame-application-content-mask", true).forEach(e => {
-					e.style.display = "block";
-				})
-				status.drag = true;
-				status.mouse_x = e.pageX;
-				status.mouse_y = e.pageY;
-				status.in_full_mode = false;
-				$(".window-frame-application", true).forEach(e => {
-					e.classList.remove("focus");
-				})
-				max_z_index++
-				parent.style.zIndex = max_z_index;
-				parent.classList.add("focus");
-			});
-
-			__drag__.On("dragging", (e) => {
-				if (status.drag == false) return;
-
-				status.app_position_side = null;
-
-				if (settings.fullscreenable == true) {
-					$('[data-svg="unfull"]').classList.add("hide");
-					$('[data-svg="full"]').classList.remove("hide");
-					$('.window-frame-application-toolbar-action-toggle').classList.remove("window-frame-application-toolbar-action-toggle-full-mode")
-				}
-				parent.classList.remove("window-frame-application-full-mode");
-				parent.style.width = settings.width + "px";
-				parent.style.height = settings.height + "px";
-				var x = e.pageX,
-					y = e.pageY;
-				var element_x = parent.offsetLeft,
-					element_y = parent.offsetTop;
-				var re_x = element_x + (x - status.mouse_x);
-				var re_y = element_y + (y - status.mouse_y);
-				parent.style.left = re_x < 0 ? 0 : re_x + parent.offsetWidth > window_width ? window_width : re_x + "px";
-				parent.style.top = re_y < 0 ? 0 : re_y + parent.offsetHeight > $(".window-frame").offsetHeight ? $(".window-frame").offsetHeight : re_y + "px";
-				status.mouse_x = x;
-				status.mouse_y = y;
-				status.last_x = parent.offsetLeft;
-				status.last_y = parent.offsetTop;
-
-				__drag__.InArea($(".window-frame"), parent, (e) => {
-					if (e == false) {
-						$(".reps").style = "";
-						$(".reps").classList.remove("active");
-					} else {
-						$(".reps").classList.add("active");
-						$(".reps").style.zIndex = max_z_index - 1;
-						if (e == "right") {
-							return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: auto; right: 8px; top: 8px; ", status.app_position_side = e, status.side_data = `bottom: 45px; left: auto; right: 0; top: 0; width: 50vw; height: calc(100vh - 45px);`;
-						}
-						if (e == "left") {
-							return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: 8px; right: auto; top: 8px;", status.app_position_side = e, status.side_data = `bottom: 45px; left: 0; right: auto; top: 0; width: 50vw; height: calc(100vh - 45px);`;
-						}
-						if (e == "top") {
-							return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: auto; left: 8px; right: 8px; top: 8px; ", status.app_position_side = e, status.side_data = `bottom: auto; left: 0; right: 0; top: 0; width: 100vw; height: calc((100% - 45px) / 2);`;
-						}
-						if (e == "bottom") {
-							return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", status.app_position_side = e, status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
-						}
+			if (settings.movable == true) {
+				dragger(title).On("dragstart", (e) => {
+					$(".window-frame-application-content-mask", true).forEach(e => {
+						e.style.display = "block";
+					})
+					status.drag = true;
+					status.mouse_x = e.pageX;
+					status.mouse_y = e.pageY;
+					status.in_full_mode = false;
+					$(".window-frame-application", true).forEach(e => {
+						e.classList.remove("focus");
+					})
+					max_z_index++;
+					parent.style.zIndex = max_z_index;
+					parent.classList.add("focus");
+				});
+	
+				__drag__.On("dragstart", (e) => {
+					$(".window-frame-application-content-mask", true).forEach(e => {
+						e.style.display = "block";
+					})
+					status.drag = true;
+					status.mouse_x = e.pageX;
+					status.mouse_y = e.pageY;
+					status.in_full_mode = false;
+					$(".window-frame-application", true).forEach(e => {
+						e.classList.remove("focus");
+					})
+					max_z_index++
+					parent.style.zIndex = max_z_index;
+					parent.classList.add("focus");
+				});
+	
+				__drag__.On("dragging", (e) => {
+					if (status.drag == false) return;
+	
+					status.app_position_side = null;
+	
+					if (settings.fullscreenable == true) {
+						$('[data-svg="unfull"]').classList.add("hide");
+						$('[data-svg="full"]').classList.remove("hide");
+						$('.window-frame-application-toolbar-action-toggle').classList.remove("window-frame-application-toolbar-action-toggle-full-mode")
 					}
-
-				}, e);
-			});
-
-			__drag__.On("dragend", () => {
-				if (status.drag == false) return;
-				if (status.app_position_side !== null) {
-					parent.classList.add("window-frame-application-full-mode");
-					parent.style = status.side_data;
-				}
-				$(".reps").style = "";
-				$(".window-frame-application-content-mask", true).forEach(e => {
-					e.style.display = "none";
+					parent.classList.remove("window-frame-application-full-mode");
+					parent.style.width = settings.width + "px";
+					parent.style.height = settings.height + "px";
+					var x = e.pageX,
+						y = e.pageY;
+					var element_x = parent.offsetLeft,
+						element_y = parent.offsetTop;
+					var re_x = element_x + (x - status.mouse_x);
+					var re_y = element_y + (y - status.mouse_y);
+					parent.style.left = re_x < 0 ? 0 : re_x + parent.offsetWidth > window_width ? window_width : re_x + "px";
+					parent.style.top = re_y < 0 ? 0 : re_y + parent.offsetHeight > $(".window-frame").offsetHeight ? $(".window-frame").offsetHeight : re_y + "px";
+					status.mouse_x = x;
+					status.mouse_y = y;
+					status.last_x = parent.offsetLeft;
+					status.last_y = parent.offsetTop;
+	
+					__drag__.InArea($(".window-frame"), parent, (e) => {
+						if (e == false) {
+							$(".reps").style = "";
+							$(".reps").classList.remove("active");
+						} else {
+							$(".reps").classList.add("active");
+							$(".reps").style.zIndex = max_z_index - 1;
+							if (e == "right") {
+								return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: auto; right: 8px; top: 8px; ", status.app_position_side = e, status.side_data = `bottom: 45px; left: auto; right: 0; top: 0; width: 50vw; height: calc(100vh - 45px);`;
+							}
+							if (e == "left") {
+								return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: 8px; right: auto; top: 8px;", status.app_position_side = e, status.side_data = `bottom: 45px; left: 0; right: auto; top: 0; width: 50vw; height: calc(100vh - 45px);`;
+							}
+							if (e == "top") {
+								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: auto; left: 8px; right: 8px; top: 8px; ", status.app_position_side = e, status.side_data = `bottom: auto; left: 0; right: 0; top: 0; width: 100vw; height: calc((100% - 45px) / 2);`;
+							}
+							if (e == "bottom") {
+								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", status.app_position_side = e, status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
+							}
+						}
+	
+					}, e);
+				});
+	
+				__drag__.On("dragend", () => {
+					if (status.drag == false) return;
+					if (status.app_position_side !== null) {
+						parent.classList.add("window-frame-application-full-mode");
+						parent.style = status.side_data;
+					}
+					$(".reps").style = "";
+					$(".window-frame-application-content-mask", true).forEach(e => {
+						e.style.display = "none";
+					})
+					status.drag = false;
+					status.app_position_side = null;
+					$(".reps").classList.remove("active");
+					if (status.in_full_mode == true && status.frame_exsit == true && settings.fullscreenable == true) {
+						$('[data-svg="unfull"]').classList.remove("hide");
+						$('[data-svg="full"]').classList.add("hide");
+					}
+					parent.style.zIndex = "none";
+					$(".window-frame-application.focus", true).forEach(e => {
+						e.classList.remove("focus");
+					})
+					parent.classList.add("focus");
+					if (!status.app_position_side) {
+						status.last_width = parent.scrollWidth;
+						status.last_height = parent.scrollHeight;
+					}
 				})
-				status.drag = false;
-				status.app_position_side = null;
-				$(".reps").classList.remove("active");
-				if (status.in_full_mode == true && status.frame_exsit == true && settings.fullscreenable == true) {
-					$('[data-svg="unfull"]').classList.remove("hide");
-					$('[data-svg="full"]').classList.add("hide");
-				}
-				parent.style.zIndex = "none";
-				$(".window-frame-application.focus", true).forEach(e => {
-					e.classList.remove("focus");
+	
+				__drag__.On("dragout", () => {
+					$(".window-frame-application-content-mask", true).forEach(e => {
+						e.style.display = "none";
+					})
+					status.drag = false;
+					status.app_position_side = null;
+					$(".reps").style = "";
+					$(".reps").classList.remove("active");
+					if (status.in_full_mode == true && status.frame_exsit == true && settings.fullscreenable == true) {
+						$('[data-svg="unfull"]').classList.remove("hide");
+						$('[data-svg="full"]').classList.add("hide");
+					}
+					parent.style.zIndex = "none";
+					$(".window-frame-application.focus", true).forEach(e => {
+						e.classList.remove("focus");
+					})
+					parent.classList.add("focus");
 				})
-				parent.classList.add("focus");
-				if (!status.app_position_side) {
-					status.last_width = parent.scrollWidth;
-					status.last_height = parent.scrollHeight;
-				}
-			})
-
-			__drag__.On("dragout", () => {
-				$(".window-frame-application-content-mask", true).forEach(e => {
-					e.style.display = "none";
-				})
-				status.drag = false;
-				status.app_position_side = null;
-				$(".reps").style = "";
-				$(".reps").classList.remove("active");
-				if (status.in_full_mode == true && status.frame_exsit == true && settings.fullscreenable == true) {
-					$('[data-svg="unfull"]').classList.remove("hide");
-					$('[data-svg="full"]').classList.add("hide");
-				}
-				parent.style.zIndex = "none";
-				$(".window-frame-application.focus", true).forEach(e => {
-					e.classList.remove("focus");
-				})
-				parent.classList.add("focus");
-			})
+			}
 
 			full !== false && full.addEventListener("click", () => {
 				if (status.in_full_mode == true) {
@@ -676,7 +678,10 @@ class App {
 				}
 			})
 
-			parent.addEventListener("click", () => {
+			parent.addEventListener("click", (e) => {
+				if (mini != false) {
+					if (e.target == mini || mini.contains(e.target)) return;
+				}
 				$(".window-tool-bar-application", true).forEach(e => {
 					e.classList.remove("active");
 				})
@@ -721,7 +726,7 @@ class App {
 			mini !== false && mini.addEventListener("click", () => {
 				parent.classList.remove("window-frame-application-show");
 				status.show = false;
-				app_icon.classList.remove("active")
+				app_icon.classList.remove("active");
 			})
 
 			close !== false && close.addEventListener("click", () => {

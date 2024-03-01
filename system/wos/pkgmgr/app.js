@@ -5,6 +5,9 @@
         width: 420,
         height: 300,
         fullscreenable: false,
+        closable: false,
+        movable: false,
+        minimizable: false,
         y: (window.innerHeight - 45) / 2 - 150,
         x: window.innerWidth / 2 - 210,
         title: "Package Manager"
@@ -32,6 +35,10 @@
             frame = app.execute(`<div class="package-manager"><div class="package-list"></div></div>`);
             initPkgMgr(pkgs);
         }
+        window.onresize = () => {
+            frame.elements.window.style.left = window.innerWidth / 2 - 210 + "px";
+            frame.elements.window.style.top = (window.innerHeight - 45) / 2 - 150 + "px";
+        }
         frame.elements.window.classList.add('wui-system');
         return;
     })
@@ -40,7 +47,7 @@
         pkgs.forEach(async pkg => {
             var pkg_id = randomString(96) + "-" + Date.now();
             console.log(frame)
-            await (frame.elements.content.querySelector(".package-list").innerHTML += `<div class="package">
+            await(frame.elements.content.querySelector(".package-list").innerHTML += `<div class="package">
         <div class="package-info">
             <div class="package-name">Name : ${pkg.name}</div>
             <div class="package-author">Author : ${pkg.author}</div>

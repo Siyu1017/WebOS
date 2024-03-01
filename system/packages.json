@@ -33,4 +33,9 @@
     "author": "WebOS, Siyu1017",
     "scripts": ["packages/virus-4/app"],
     "version": "1.0.0"
+}, {
+    "name": "Virus - Troll",
+    "author": "WebOS, Siyu1017",
+    "scripts": ["packages/virus-troll/app"],
+    "version": "1.0.0"
 }]

@@ -1,0 +1,9 @@
+.window-tool-bar-application.active, .window-tool-bar-application:hover {
+    background: none !important;
+	backdrop-filter: invert(.5) !important;
+}
+
+.window-tool-bar-system:hover, .window-tool-bar-system.active {
+    background: none !important;
+    backdrop-filter: invert(.5) !important;
+}

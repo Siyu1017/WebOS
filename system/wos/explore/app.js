@@ -28,6 +28,14 @@
         }
     }
 
+    System.showStartLoading = () => {
+        $("#loading").classList.add("active");
+    }
+
+    System.hideStartLoading = () => {
+        $("#loading").classList.remove("active");
+    }
+
     System.loadSystemApps = (apps) => {
         System.loadApp(0, apps)
     }
@@ -98,10 +106,7 @@
         await System.loadApp(0, ["time/app", "pkgmgr/app"]);
         (async (status) => {
             await delay(500)
-            $("#loading").classList.remove("active");
-            setTimeout(() => {
-                $("#loading").remove();
-            }, 1000)
+            System.hideStartLoading();
         })()
     }
 
