@@ -18,12 +18,14 @@
     }
     */
 
-    System.loadApp = async function (curr = 0, arr) {
+    System.loadApp = async function (curr = 0, arr, callback = function(){}) {
         var script = document.createElement("script");
         script.src = "./system/wos/" + arr[curr] + ".js";
         document.head.appendChild(script);
         script.onload = () => {
-            if (curr == arr.length - 1) return;
+            if (curr == arr.length - 1) {
+                return callback();
+            }
             System.loadApp(curr + 1, arr);
         }
     }
@@ -36,8 +38,8 @@
         $("#loading").classList.remove("active");
     }
 
-    System.loadSystemApps = (apps) => {
-        System.loadApp(0, apps)
+    System.loadSystemApps = (apps, callback) => {
+        System.loadApp(0, apps, callback)
     }
     window.onload = async () => {
         var explore = new App(null, null, {
@@ -103,7 +105,7 @@
         }
         imgLoad("./application.png")
 
-        await System.loadApp(0, ["time/app", "pkgmgr/app"]);
+        await System.loadApp(0, ["time/app", "pkgmgr/app", "gotodesktop/app"]);
         (async (status) => {
             await delay(500)
             System.hideStartLoading();

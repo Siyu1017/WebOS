@@ -44,11 +44,16 @@
 	font-size: 150%;
 }
 
-.webos-loading-spinner {
-	box-sizing: border-box;
+.window-loading .webos-loading-spinner {
 	width: 40px;
 	height: 40px;
-	padding: 3px;
+}
+
+.webos-loading-spinner {
+	box-sizing: border-box;
+	width: 18px;
+	height: 18px;
+	padding: 2px;
 	overflow: visible;
 }
 
@@ -62,8 +67,8 @@
 	animation: 2s linear 0s infinite normal none running loading-spinner;
 }
 
-.webos-loading-image,
-.webos-loading-spinner {
+.window-loading .webos-loading-image,
+.window-loading .webos-loading-spinner {
 	opacity: 0;
 	animation: .2s linear .1s 1 normal forwards running show-loader;
 }

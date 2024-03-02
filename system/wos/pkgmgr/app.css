@@ -31,6 +31,30 @@
     align-items: center;
 }
 
+.package-enable .webos-loading-spinner {
+    display: none;
+}
+
+.package-enable.loading {
+    opacity: .7;
+    pointer-events: none;
+}
+ 
+.package.disabled {
+    opacity: .5;
+    pointer-events: none;
+    user-select: none;
+    cursor: not-allowed;
+}
+
+.package-enable.loading .package-enable-title {
+    display: none;
+}
+
+.package-enable.loading .webos-loading-spinner {
+    display: block;
+}
+
 :root {
     --windows11-ui-input-defualt-color: #0069c4;
     --windows11-ui-input-defualt-text: #fff;

@@ -7,6 +7,7 @@
 		title: "一個破爛的瀏覽器",
 		icon: "./system/wos/browser/browser.png"
 	});
+	test.loadStyles("./system/wos/browser/app.css", "url")
 	var tests = test.execute(`<div class="browser">
 <div class="tools">
 	<div class="back disabled" id="back">

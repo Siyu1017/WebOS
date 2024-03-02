@@ -47,18 +47,26 @@
         pkgs.forEach(async pkg => {
             var pkg_id = randomString(96) + "-" + Date.now();
             console.log(frame)
-            await(frame.elements.content.querySelector(".package-list").innerHTML += `<div class="package">
+            await (frame.elements.content.querySelector(".package-list").innerHTML += `<div class="package ${pkg.disabled == true ? "disabled" : ""}">
         <div class="package-info">
             <div class="package-name">Name : ${pkg.name}</div>
             <div class="package-author">Author : ${pkg.author}</div>
             <div class="package-version">Version : ${pkg.version}</div>
         </div>
         <div class="package-operate">
-            <button class="package-enable wui-button" data-pkg-id="${pkg_id}">Enable</button>
+            <button class="package-enable wui-button" data-pkg-id="${pkg_id}" ${pkg.disabled == true ? "disabled" : ""}><span class="package-enable-title">Enable</span><svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
+            <circle cx="8px" cy="8px" r="7px"></circle>
+        </svg></button>
         </div>
         </div>`);
-            frame.elements.content.querySelector(`[data-pkg-id='${pkg_id}']`).addEventListener("click", (e) => {
-                System.loadSystemApps(pkg.scripts);
+            var button = frame.elements.content.querySelector(`[data-pkg-id='${pkg_id}']`);
+            button.addEventListener("click", (e) => {
+                button.classList.add("loading");
+                setTimeout(() => {
+                    System.loadSystemApps(pkg.scripts, () => {
+                        button.classList.remove("loading");
+                    });
+                }, 100)
             })
         })
     }

@@ -7,7 +7,8 @@
     "name": "Command",
     "author": "WebOS, Siyu1017",
     "scripts": ["packages/cmd/app"],
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "disabled": true
 }, {
     "name": "Painter",
     "author": "WebOS, Siyu1017",
@@ -42,5 +43,10 @@
     "name": "Virus - Troll",
     "author": "WebOS, Siyu1017",
     "scripts": ["packages/virus-troll/app"],
+    "version": "1.0.0"
+}, {
+    "name": "Restart",
+    "author": "WebOS, Siyu1017",
+    "scripts": ["packages/restart/app"],
     "version": "1.0.0"
 }]

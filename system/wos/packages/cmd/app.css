@@ -10,7 +10,7 @@
 }
 
 .cmd * {
-    color: #fff;
+    color: rgb(242, 242, 242);
     font-family: monospace;
     box-sizing: border-box;
 }
@@ -19,4 +19,13 @@
     background: none;
     border: none;
     resize: none;
+    outline: 0;
+    padding: 0;
+    color: rgba(0, 0, 0, 0);
+    caret-color: #fff;
+}
+
+.terminal *::selection {
+    background: #fff;
+    color: #000;
 }

@@ -15,6 +15,8 @@ var last_click_app = null;
 var side_data = "";
 var max_z_index = 9;
 
+var running_apps = {};
+
 var dragger = (t, c) => {
 	c = c || {};
 	var target = t,
@@ -382,6 +384,9 @@ class App {
 		if (!App_data.contains(id) == true) return;
 
 	}
+	close() {
+		delete running_apps[this.hash];
+	}
 	loadStyles(content, type) {
 		if (type == "text") {
 			var s_e = document.createElement("style");
@@ -476,6 +481,23 @@ class App {
 		parent.appendChild(content);
 		parent.appendChild(mask);
 
+		this.status = {
+			drag: false,
+			app_position_side: null,
+			side_data: null,
+			last_x: 0,
+			last_y: 0,
+			mouse_x: 0,
+			mouse_y: 0,
+			last_width: settings.width,
+			last_height: settings.height,
+			in_full_mode: false,
+			frame_exsit: true,
+			show: settings.show
+		}
+
+		var app_icon = settings.showinbar == true ? child("div", $(".window-tool-bar-applications"), { class: settings.show == true ? "window-tool-bar-application running active" : "window-tool-bar-application running" }, `<div class="window-tool-bar-application-icon"><img class="window-tool-bar-application-icon-image" src="${settings.icon ? settings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
+
 		if (settings.toolbar == true) {
 			var title = child("div", toolbar, { class: "window-frame-application-toolbar-title" });
 			var drag = child("div", toolbar, { class: "window-frame-application-toolbar-drag" });
@@ -494,36 +516,21 @@ class App {
 				e.classList.remove("active");
 			})
 
-			var app_icon = settings.showinbar == true ? child("div", $(".window-tool-bar-applications"), { class: settings.show == true ? "window-tool-bar-application running active" : "window-tool-bar-application running" }, `<div class="window-tool-bar-application-icon"><img class="window-tool-bar-application-icon-image" src="${settings.icon ? settings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
-
 			var __drag__ = settings.movable == true ? dragger(drag) : {
 				On: function () { },
 				InArea: function () { }
 			};
 
-			var window_width = window.innerWidth;
-			var window_height = window.innerHeight;
+			this.app_icon = app_icon;
 
-			var status = {
-				drag: false,
-				app_position_side: null,
-				side_data: null,
-				last_x: 0,
-				last_y: 0,
-				mouse_x: 0,
-				mouse_y: 0,
-				last_width: settings.width,
-				last_height: settings.height,
-				in_full_mode: false,
-				frame_exsit: true,
-				show: settings.show
-			}
+			var window_width = window.innerWidth;
+			var window_height = window.innerHeight;			
 
 			if (close != false) {
 				close.addEventListener("click", () => {
 					parent.remove();
 					// $(".window-tool-bar-application").remove();
-					status.frame_exsit = false;
+					this.status.frame_exsit = false;
 				})
 			}
 
@@ -532,10 +539,10 @@ class App {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "block";
 					})
-					status.drag = true;
-					status.mouse_x = e.pageX;
-					status.mouse_y = e.pageY;
-					status.in_full_mode = false;
+					this.status.drag = true;
+					this.status.mouse_x = e.pageX;
+					this.status.mouse_y = e.pageY;
+					this.status.in_full_mode = false;
 					$(".window-frame-application", true).forEach(e => {
 						e.classList.remove("focus");
 					})
@@ -548,10 +555,10 @@ class App {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "block";
 					})
-					status.drag = true;
-					status.mouse_x = e.pageX;
-					status.mouse_y = e.pageY;
-					status.in_full_mode = false;
+					this.status.drag = true;
+					this.status.mouse_x = e.pageX;
+					this.status.mouse_y = e.pageY;
+					this.status.in_full_mode = false;
 					$(".window-frame-application", true).forEach(e => {
 						e.classList.remove("focus");
 					})
@@ -561,9 +568,9 @@ class App {
 				});
 
 				__drag__.On("dragging", (e) => {
-					if (status.drag == false) return;
+					if (this.status.drag == false) return;
 
-					status.app_position_side = null;
+					this.status.app_position_side = null;
 
 					if (settings.fullscreenable == true) {
 						$('[data-svg="unfull"]').classList.add("hide");
@@ -577,14 +584,14 @@ class App {
 						y = e.pageY;
 					var element_x = parent.offsetLeft,
 						element_y = parent.offsetTop;
-					var re_x = element_x + (x - status.mouse_x);
-					var re_y = element_y + (y - status.mouse_y);
+					var re_x = element_x + (x - this.status.mouse_x);
+					var re_y = element_y + (y - this.status.mouse_y);
 					parent.style.left = re_x < 0 ? 0 : re_x + parent.offsetWidth > window_width ? window_width : re_x + "px";
 					parent.style.top = re_y < 0 ? 0 : re_y + parent.offsetHeight > $(".window-frame").offsetHeight ? $(".window-frame").offsetHeight : re_y + "px";
-					status.mouse_x = x;
-					status.mouse_y = y;
-					status.last_x = parent.offsetLeft;
-					status.last_y = parent.offsetTop;
+					this.status.mouse_x = x;
+					this.status.mouse_y = y;
+					this.status.last_x = parent.offsetLeft;
+					this.status.last_y = parent.offsetTop;
 
 					__drag__.InArea($(".window-frame"), parent, (e) => {
 						if (e == false) {
@@ -594,16 +601,16 @@ class App {
 							$(".reps").classList.add("active");
 							$(".reps").style.zIndex = max_z_index - 1;
 							if (e == "right") {
-								return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: auto; right: 8px; top: 8px; ", status.app_position_side = e, status.side_data = `bottom: 45px; left: auto; right: 0; top: 0; width: 50vw; height: calc(100vh - 45px);`;
+								return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: auto; right: 8px; top: 8px; ", this.status.app_position_side = e, this.status.side_data = `bottom: 45px; left: auto; right: 0; top: 0; width: 50vw; height: calc(100vh - 45px);`;
 							}
 							if (e == "left") {
-								return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: 8px; right: auto; top: 8px;", status.app_position_side = e, status.side_data = `bottom: 45px; left: 0; right: auto; top: 0; width: 50vw; height: calc(100vh - 45px);`;
+								return $(".reps").style = "width: calc(50vw - 12px); height: calc(100vh - 45px - 16px);bottom: 53px; left: 8px; right: auto; top: 8px;", this.status.app_position_side = e, this.status.side_data = `bottom: 45px; left: 0; right: auto; top: 0; width: 50vw; height: calc(100vh - 45px);`;
 							}
 							if (e == "top") {
-								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: auto; left: 8px; right: 8px; top: 8px; ", status.app_position_side = e, status.side_data = `bottom: auto; left: 0; right: 0; top: 0; width: 100vw; height: calc((100% - 45px) / 2);`;
+								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: auto; left: 8px; right: 8px; top: 8px; ", this.status.app_position_side = e, this.status.side_data = `bottom: auto; left: 0; right: 0; top: 0; width: 100vw; height: calc((100% - 45px) / 2);`;
 							}
 							if (e == "bottom") {
-								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", status.app_position_side = e, status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
+								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", this.status.app_position_side = e, this.status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
 							}
 						}
 
@@ -611,19 +618,19 @@ class App {
 				});
 
 				__drag__.On("dragend", () => {
-					if (status.drag == false) return;
-					if (status.app_position_side !== null) {
+					if (this.status.drag == false) return;
+					if (this.status.app_position_side !== null) {
 						parent.classList.add("window-frame-application-full-mode");
-						parent.style = status.side_data;
+						parent.style = this.status.side_data;
 					}
 					$(".reps").style = "";
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "none";
 					})
-					status.drag = false;
-					status.app_position_side = null;
+					this.status.drag = false;
+					this.status.app_position_side = null;
 					$(".reps").classList.remove("active");
-					if (status.in_full_mode == true && status.frame_exsit == true && settings.fullscreenable == true) {
+					if (this.status.in_full_mode == true && this.status.frame_exsit == true && settings.fullscreenable == true) {
 						$('[data-svg="unfull"]').classList.remove("hide");
 						$('[data-svg="full"]').classList.add("hide");
 					}
@@ -632,9 +639,9 @@ class App {
 						e.classList.remove("focus");
 					})
 					parent.classList.add("focus");
-					if (!status.app_position_side) {
-						status.last_width = parent.scrollWidth;
-						status.last_height = parent.scrollHeight;
+					if (!this.status.app_position_side) {
+						this.status.last_width = parent.scrollWidth;
+						this.status.last_height = parent.scrollHeight;
 					}
 				})
 
@@ -642,11 +649,11 @@ class App {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "none";
 					})
-					status.drag = false;
-					status.app_position_side = null;
+					this.status.drag = false;
+					this.status.app_position_side = null;
 					$(".reps").style = "";
 					$(".reps").classList.remove("active");
-					if (status.in_full_mode == true && status.frame_exsit == true && settings.fullscreenable == true) {
+					if (this.status.in_full_mode == true && this.status.frame_exsit == true && settings.fullscreenable == true) {
 						$('[data-svg="unfull"]').classList.remove("hide");
 						$('[data-svg="full"]').classList.add("hide");
 					}
@@ -659,16 +666,16 @@ class App {
 			}
 
 			full !== false && full.addEventListener("click", () => {
-				if (status.in_full_mode == true) {
-					status.in_full_mode = false;
+				if (this.status.in_full_mode == true) {
+					this.status.in_full_mode = false;
 					parent.classList.remove("window-frame-application-full-mode");
 					full.classList.remove("window-frame-application-toolbar-action-toggle-full-mode")
-					parent.style.width = status.last_width + "px";
-					parent.style.height = status.last_height + "px";
-					parent.style.top = status.last_y + "px";
-					parent.style.left = status.last_x + "px";
+					parent.style.width = this.status.last_width + "px";
+					parent.style.height = this.status.last_height + "px";
+					parent.style.top = this.status.last_y + "px";
+					parent.style.left = this.status.last_x + "px";
 				} else {
-					status.in_full_mode = true;
+					this.status.in_full_mode = true;
 					parent.classList.add("window-frame-application-full-mode");
 					full.classList.add("window-frame-application-toolbar-action-toggle-full-mode");
 					parent.style.top = "0";
@@ -685,7 +692,7 @@ class App {
 				$(".window-tool-bar-application", true).forEach(e => {
 					e.classList.remove("active");
 				})
-				status.show = true;
+				this.status.show = true;
 				app_icon.classList.add("active");
 				max_z_index++;
 				parent.style.zIndex = max_z_index;
@@ -697,21 +704,21 @@ class App {
 					$(".window-tool-bar-application", true).forEach(e => {
 						e.classList.remove("active");
 					})
-					status.show = true;
+					this.status.show = true;
 					app_icon.classList.add("active");
 					max_z_index++;
 					parent.style.zIndex = max_z_index;
 					parent.classList.add("window-frame-application-show");
 				} else {
-					if (status.show == true) {
-						status.show = false;
+					if (this.status.show == true) {
+						this.status.show = false;
 						app_icon.classList.remove("active");
 						parent.classList.remove("window-frame-application-show");
 					} else {
 						$(".window-tool-bar-application", true).forEach(e => {
 							e.classList.remove("active");
 						})
-						status.show = true;
+						this.status.show = true;
 						app_icon.classList.add("active");
 						parent.classList.add("window-frame-application-show");
 						max_z_index++;
@@ -725,15 +732,22 @@ class App {
 
 			mini !== false && mini.addEventListener("click", () => {
 				parent.classList.remove("window-frame-application-show");
-				status.show = false;
+				this.status.show = false;
 				app_icon.classList.remove("active");
 			})
 
 			close !== false && close.addEventListener("click", () => {
 				parent.remove();
 				app_icon.remove();
-				status.frame_exsit = false;
+				delete running_apps[this.hash];
+				this.status.frame_exsit = false;
 			})
+		}
+
+		this.hide = () => {
+			parent.classList.remove("window-frame-application-show");
+			this.status.show = false;
+			app_icon.classList.remove("active");
 		}
 
 		var toggle_full = {
@@ -795,6 +809,16 @@ class App {
 		max_z_index++;
 		parent.style.zIndex = max_z_index;
 		last_click_app = this.hash;
+
+		this.parent = parent;
+
+		this.elements = {
+			window: parent,
+			toolbar: toolbar,
+			content: content
+		}
+
+		running_apps[this.hash] = this;
 
 		return {
 			changeIcon: changeIcon,
