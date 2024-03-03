@@ -328,6 +328,16 @@ class App {
 				value: true,
 				type: "boolean",
 				name: "toolbar"
+			},
+			showloading: {
+				value: false,
+				type: "boolean",
+				name: "showloading"
+			},
+			loadingColor: {
+				value: "#0069c4",
+				type: "string",
+				name: "loadingColor"
 			}
 		};
 		var settings = {};
@@ -387,7 +397,7 @@ class App {
 	close() {
 		delete running_apps[this.hash];
 	}
-	loadStyles(content, type) {
+	loadStyles(content, type, callback = function () {}) {
 		if (type == "text") {
 			var s_e = document.createElement("style");
 			var style = "";
@@ -408,8 +418,11 @@ class App {
 			var link = document.createElement("link");
 			link.rel = "stylesheet";
 			link.type = "text/css";
-			link.href = content
+			link.href = content;
 			document.head.appendChild(link);
+			link.onload = () => {
+				callback();
+			}
 		}
 	}
 	execute(con, callback, config) {
@@ -485,8 +498,8 @@ class App {
 			drag: false,
 			app_position_side: null,
 			side_data: null,
-			last_x: 0,
-			last_y: 0,
+			last_x: settings.x,
+			last_y: settings.y,
 			mouse_x: 0,
 			mouse_y: 0,
 			last_width: settings.width,
@@ -497,6 +510,18 @@ class App {
 		}
 
 		var app_icon = settings.showinbar == true ? child("div", $(".window-tool-bar-applications"), { class: settings.show == true ? "window-tool-bar-application running active" : "window-tool-bar-application running" }, `<div class="window-tool-bar-application-icon"><img class="window-tool-bar-application-icon-image" src="${settings.icon ? settings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
+
+		var loading = child("div", parent, { class: settings.showloading == true ? "window-frame-application-loading active" : "window-frame-application-loading", style: `background: ${settings.backgroundColor}` }, `<svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
+		<circle cx="8px" cy="8px" r="7px" style="stroke: ${settings.loadingColor}"></circle>
+	</svg>`);
+
+		this.showLoading = () => {
+			loading.classList.add("active");
+		}
+
+		this.hideLoading = () => {
+			loading.classList.remove("active");
+		}
 
 		if (settings.toolbar == true) {
 			var title = child("div", toolbar, { class: "window-frame-application-toolbar-title" });
@@ -524,7 +549,7 @@ class App {
 			this.app_icon = app_icon;
 
 			var window_width = window.innerWidth;
-			var window_height = window.innerHeight;			
+			var window_height = window.innerHeight;
 
 			if (close != false) {
 				close.addEventListener("click", () => {

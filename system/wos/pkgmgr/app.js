@@ -47,27 +47,47 @@
         pkgs.forEach(async pkg => {
             var pkg_id = randomString(96) + "-" + Date.now();
             console.log(frame)
-            await (frame.elements.content.querySelector(".package-list").innerHTML += `<div class="package ${pkg.disabled == true ? "disabled" : ""}">
+            await (frame.elements.content.querySelector(".package-list").innerHTML += `<div class="package ${pkg.disabled == true ? "disabled" : ""}" ${pkg.disabled == true ? "data-disabled" : ""}>
         <div class="package-info">
             <div class="package-name">Name : ${pkg.name}</div>
             <div class="package-author">Author : ${pkg.author}</div>
             <div class="package-version">Version : ${pkg.version}</div>
         </div>
         <div class="package-operate">
-            <button class="package-enable wui-button" data-pkg-id="${pkg_id}" ${pkg.disabled == true ? "disabled" : ""}><span class="package-enable-title">Enable</span><svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
+            <button class="package-enable wui-button" data-btn-id="${pkg_id}" ${pkg.disabled == true ? "disabled" : ""}><span class="package-enable-title">Enable</span><svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
             <circle cx="8px" cy="8px" r="7px"></circle>
         </svg></button>
         </div>
         </div>`);
-            var button = frame.elements.content.querySelector(`[data-pkg-id='${pkg_id}']`);
+            var button = frame.elements.content.querySelector(`[data-btn-id='${pkg_id}']`);
             button.addEventListener("click", (e) => {
                 button.classList.add("loading");
+                button.disabled = true;
                 setTimeout(() => {
                     System.loadSystemApps(pkg.scripts, () => {
                         button.classList.remove("loading");
+                        button.disabled = false;
                     });
                 }, 100)
-            })
+            });
         })
+        window.onoffline = () => {
+            frame.elements.content.querySelectorAll(`[data-btn-id]`).forEach(button => {
+                button.classList.remove("loading");
+                button.disabled = true;
+            })
+            frame.elements.content.querySelectorAll('.package').forEach(package => {
+                package.classList.add("disabled");
+            })
+        }
+        window.ononline = () => {
+            frame.elements.content.querySelectorAll(`.package:not([data-disabled]) [data-btn-id]`).forEach(button => {
+                button.classList.remove("loading");
+                button.disabled = false;
+            })
+            frame.elements.content.querySelectorAll('.package:not([data-disabled])').forEach(package => {
+                package.classList.remove("disabled");
+            })
+        }
     }
 })()

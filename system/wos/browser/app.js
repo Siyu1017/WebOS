@@ -1,13 +1,13 @@
-(function() {
+(function () {
 	var test = new App(null, "", {
 		width: 420,
 		height: 300,
 		y: 75,
 		x: 120,
 		title: "一個破爛的瀏覽器",
-		icon: "./system/wos/browser/browser.png"
+		icon: "./system/wos/browser/browser.png",
+		showloading: true
 	});
-	test.loadStyles("./system/wos/browser/app.css", "url")
 	var tests = test.execute(`<div class="browser">
 <div class="tools">
 	<div class="back disabled" id="back">
@@ -154,7 +154,7 @@
 			tests.changeTitle(visit_history[currentIndex]);
 		}
 
-		document.getElementById("url-i").addEventListener('focus', function() {
+		document.getElementById("url-i").addEventListener('focus', function () {
 			document.getElementById("url-i").select();
 		});
 
@@ -178,5 +178,9 @@
 				document.getElementById("refresh").classList.add("disabled");
 			}
 		};
+
+		test.loadStyles("./system/wos/browser/app.css", "url", () => {
+			test.hideLoading();
+		})
 	})
 })()

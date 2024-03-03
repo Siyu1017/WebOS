@@ -18,7 +18,7 @@
     }
     */
 
-    System.loadApp = async function (curr = 0, arr, callback = function(){}) {
+    System.loadApp = async function (curr = 0, arr, callback = function () { }) {
         var script = document.createElement("script");
         script.src = "./system/wos/" + arr[curr] + ".js";
         document.head.appendChild(script);
@@ -105,7 +105,7 @@
         }
         imgLoad("./application.png")
 
-        await System.loadApp(0, ["time/app", "pkgmgr/app", "gotodesktop/app"]);
+        await System.loadApp(0, ["pkgmgr/app", "time/app", "gotodesktop/app"]);
         (async (status) => {
             await delay(500)
             System.hideStartLoading();
