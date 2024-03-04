@@ -4,9 +4,10 @@
 		height: 300,
 		y: 75,
 		x: 120,
-		title: "一個破爛的瀏覽器",
+		title: "Web Browser",
 		icon: "./system/wos/browser/browser.png",
-		showloading: true
+		showloading: true,
+		backgroundColor: "rgb(255, 255, 255)"
 	});
 	var tests = test.execute(`<div class="browser">
 <div class="tools">
@@ -39,11 +40,15 @@
 <div class="frame">
 	<iframe id="browser" hidden></iframe>
 	<div class="home" id="home">
-		<div class="title">一個破爛的瀏覽器</div>
-		<div class="description">我們可以非常負責任地說：有非常多的問題在這當中</div>
+		<div class="title">Just a web browser</div>
+		<div class="description">We can say very responsibly: there are many problems in this web browser.</div>
 	</div>
 </div>
 </div>`, () => {
+
+		function formarString(str) {
+			return str.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+		}
 		NProgress.configure({
 			showSpinner: false,
 			parent: ".frame"
@@ -83,7 +88,7 @@
 			} else {
 				next.classList.add("disabled");
 			}
-			tests.changeTitle(url);
+			tests.changeTitle(formarString(url));
 			NProgress.set(0);
 			NProgress.start();
 			document.getElementById("refresh").classList.add("disabled");
@@ -105,17 +110,17 @@
 			} else {
 				next.classList.add("disabled");
 			}
-			tests.changeTitle(visit_history[currentIndex]);
+			tests.changeTitle(formarString(visit_history[currentIndex]));
 		}
 
 		function reload() {
 			document.getElementById('browser').src = document.getElementById('browser').getAttribute("src");
 			if (currentIndex > -1) {
 				document.getElementById("url-i").value = visit_history[currentIndex];
-				tests.changeTitle(visit_history[currentIndex]);
+				tests.changeTitle(formarString(visit_history[currentIndex]));
 			} else {
 				document.getElementById("url-i").value = "";
-				tests.changeTitle("一個破爛的瀏覽器");
+				tests.changeTitle("Web Browser");
 			}
 		}
 
@@ -127,12 +132,12 @@
 					browser.hidden = false;
 					loadPage(visit_history[currentIndex]);
 					document.getElementById("url-i").value = visit_history[currentIndex];
-					tests.changeTitle(visit_history[currentIndex]);
+					tests.changeTitle(formarString(visit_history[currentIndex]));
 				} else {
 					home.hidden = false;
 					browser.hidden = true;
 					document.getElementById("url-i").value = "";
-					tests.changeTitle("一個破爛的瀏覽器");
+					tests.changeTitle("Web Browser");
 				}
 			}
 			if (currentIndex > -1) {
@@ -151,7 +156,7 @@
 			visit_history.splice(currentIndex + 1);
 			visit_history.push(url);
 			currentIndex++;
-			tests.changeTitle(visit_history[currentIndex]);
+			tests.changeTitle(formarString(visit_history[currentIndex]));
 		}
 
 		document.getElementById("url-i").addEventListener('focus', function () {

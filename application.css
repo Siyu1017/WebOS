@@ -126,8 +126,7 @@ svg {
 
 .window-tool-bar {
 	height: 45px;
-	background: rgba(228, 239, 249, .9);
-	backdrop-filter: blur(5px);
+	background: rgba(243, 243, 243, .85);
 	display: flex;
 	align-items: center;
 	z-index: 9;
@@ -136,6 +135,8 @@ svg {
 	-webkit-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	-webkit-backdrop-filter: saturate(3) blur(20px);
+    backdrop-filter: saturate(3) blur(20px);
 }
 
 img.window-tool-bar-application-icon-image {
@@ -160,7 +161,7 @@ img.window-tool-bar-application-icon-image {
 }
 
 .window-tool-bar-application.active, .window-tool-bar-application:hover {
-	background: rgba(255, 255, 255, .7);
+	background: rgba(255, 255, 255, .67);
 	border-radius: 4px;
 }
 

@@ -13,9 +13,9 @@
 
 	var now = new Date(Date.now());
 
-	var pattern = ["上午 ", "下午 "]
+	var pattern = [" AM", " PM"]
 
-	$(".window-tool-bar-system-time-time").innerHTML = (now.format("hh") < 12 ? pattern[0] : pattern[1]) + (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm"));
+	$(".window-tool-bar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
 	$(".window-tool-bar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
 
 	var last_time = now.format("yyyy/MM/dd hh:mm");
@@ -29,7 +29,7 @@
 			last_whole_time = now.format("yyyy/MM/dd hh:mm:ss");
 		}
 		if (last_time !== now.format("yyyy/MM/dd hh:mm")) {
-			$(".window-tool-bar-system-time-time").innerHTML = (now.format("hh") < 12 ? pattern[0] : pattern[1]) + (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm"));
+			$(".window-tool-bar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
 			$(".window-tool-bar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
 			last_time = now.format("yyyy/MM/dd hh:mm");
 		}
