@@ -1,0 +1,18 @@
+.window-frame-application-toolbar-actions {
+    padding: 2px;
+    gap: 4px;
+    box-sizing: border-box;
+}
+
+.window-frame-application-toolbar-action {
+    border-radius: 5px;
+    width: 24px;
+}
+
+body {
+    background-image: url(./bg.jpg);
+}
+
+.window-tool-bar {
+    background: rgba(243, 243, 243, .75);
+}

@@ -1,52 +1,107 @@
-[{
-    "name": "Web Browser",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["browser/app"],
-    "version": "1.0.0"
-}, {
-    "name": "Command",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/cmd/app"],
-    "version": "1.0.0",
-    "disabled": true
-}, {
-    "name": "Painter",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/painter/app"],
-    "version": "1.0.0"
-}, {
-    "name": "FPS Meter",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/fpsmeter/app"],
-    "version": "1.0.0"
-}, {
-    "name": "Virus - 1",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/virus-1/app"],
-    "version": "1.0.0"
-}, {
-    "name": "Virus - 2",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/virus-2/app"],
-    "version": "1.0.0"
-}, {
-    "name": "Virus - 3",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/virus-3/app"],
-    "version": "1.0.0"
-}, {
-    "name": "Virus - 4",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/virus-4/app"],
-    "version": "1.0.0"
-}, {
-    "name": "Virus - Troll",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/virus-troll/app"],
-    "version": "1.0.0"
-}, {
-    "name": "Restart",
-    "author": "WebOS, Siyu1017",
-    "scripts": ["packages/restart/app"],
-    "version": "1.0.0"
-}]
+[
+    {
+        "name": "Web Browser",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "browser/app"
+        ],
+        "version": "1.1.0"
+    },
+    {
+        "name": "Youtube Downloader",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/yt-dler/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Genshin Impact",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/genshinimpact/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Windows12 Theme",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/windows12-theme/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Command",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/cmd/app"
+        ],
+        "version": "1.0.0",
+        "disabled": false
+    },
+    {
+        "name": "Painter",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/painter/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "FPS Meter",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/fpsmeter/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Virus - 1",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-1/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Virus - 2",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-2/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Virus - 3",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-3/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Virus - 4",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-4/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Virus - Troll",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-troll/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Restart",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/restart/app"
+        ],
+        "version": "1.0.0"
+    }
+]
