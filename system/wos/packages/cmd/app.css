@@ -1,12 +1,18 @@
 .cmd {
+    position: relative;
     height: 100%;
-    background: rgb(24, 24, 24);
+    background: rgb(40,44,52);
 }
 
 .terminal {
     width: 100%;
     height: 100%;
-    padding: 8px;
+    max-height: 100%;
+    padding: 8px 8px 64px 8px;
+    overflow: auto;
+    position: relative;
+    top: 0;
+    bottom: 0;
 }
 
 .cmd * {
@@ -21,11 +27,112 @@
     resize: none;
     outline: 0;
     padding: 0;
-    color: rgba(0, 0, 0, 0);
+    color: rgba(255, 255, 255, 1);
     caret-color: #fff;
+    width: 100%;
+    height: auto;
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    font: inherit;
+}
+
+.terminal-input * {
+    all: unset;
+}
+
+.terminal-line {
+    overflow: hidden;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.terminal-line * {
+    display: unset;
+}
+
+.terminal-line-error {
+    color: #f1828c;
+}
+
+.terminal-line-warning {
+    color: #ffd78e;
+}
+
+.terminal-table {
+    display: flex;
+    margin: 8px 0;
+    border: 1px solid;
+    border-radius: 6px;
+}
+
+.terminal-col {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.terminal-col + .terminal-col {
+    border-left: 1px solid;
+}
+
+.terminal-row + .terminal-row {
+    border-top: 1px solid;
+}
+
+.terminal-row {
+    padding: 4px 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
 }
 
 .terminal *::selection {
-    background: #fff;
-    color: #000;
+    /*background: #fff;
+    color: #000;*/
+    background: rgba(171, 171, 171, .5);
+    color: revert;
+}
+
+.terminal::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+    background: none;
+}
+
+.terminal::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 16px 16px transparent
+        /*border: solid 4px transparent;*/
+}
+
+.terminal::-webkit-scrollbar-thumb {
+    box-shadow: inset 0 0 16px 16px rgba(191, 191, 191, .2);
+    /*border: solid 4px transparent;*/
+}
+
+.terminal::-webkit-scrollbar-thumb:hover {
+    box-shadow: inset 0 0 16px 16px rgba(191, 191, 191, .5);
+    /*border: solid 4px transparent;*/
+}
+
+.terminal::-webkit-scrollbar-button {
+    display: none;
+}
+
+.terminal::-webkit-scrollbar-corner {
+    background: none;
+}
+
+.terminal-typein {
+    display: flex;
+}
+
+.terminal-group {
+    display: flex;
+    margin-bottom: 16px;
+}
+
+.terminal-path {
+    margin-right: 8px;
 }
