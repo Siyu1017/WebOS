@@ -118,17 +118,17 @@
 
         initHackPanel();
 
-        var generateResponse = (id) => {
+        function generateResponse(id) {
             var parent = terminal_lines.querySelector(`[data-id="${id}"]`);
-            var createLine = (content, type = "default") => {
-                parent.innerHTML += `<div class="terminal-line terminal-line-${type}">${content}</div>`;
+            var createLine = (content, type = "default", format = false) => {
+                parent.innerHTML += `<div class="terminal-line terminal-line-${type}">${format == true ? formatString(content) : content}</div>`;
                 if (terminal.scrollTop >= terminal.scrollHeight - terminal.offsetHeight * 2) {
                     terminal.scrollTop = terminal.scrollHeight;
                 }
             }
-            var createLineFromArray = (array, type) => {
+            var createLineFromArray = (array, type, format = false) => {
                 array.forEach(line => {
-                    createLine(line, type);
+                    createLine(line, type, format);
                 })
             }
             var createTable = (table) => {
@@ -144,7 +144,29 @@
                 });
                 parent.innerHTML += `<div class="terminal-table">${html}</div>`;
             }
-            return { id, parent, createLine, createLineFromArray, createTable }
+            var createCustomTable = () => {
+                var table = document.createElement("div");
+                table.className = "terminal-table";
+                var createCol = (classList = []) => {
+                    var col = document.createElement("div");
+                    classList.concat(["terminal-col"]).forEach(item => {
+                        col.classList.add(item);
+                    })
+                    table.appendChild(col);
+                    var createRow = (content, classList = [], format = false) => {
+                        var row = document.createElement("div");
+                        classList.concat(["terminal-row"]).forEach(item => {
+                            row.classList.add(item);
+                        })
+                        row.innerHTML = format == true ? formatString(content) : content;
+                        col.appendChild(row);
+                    }
+                    return { createRow };
+                }
+                parent.appendChild(table);
+                return { table, createCol };
+            }
+            return { id, parent, createLine, createLineFromArray, createTable, createCustomTable }
         }
 
         var isNumber = function isNumber(value) {
@@ -163,14 +185,59 @@
             package: {
                 install: (content, id) => {
                     var api = generateResponse(id);
+                    var mode = "--none";
+                    content.split(" ").forEach(obj => {
+                        var temp = obj.match(/--[A-z0-9-]+/gi) || null;
+                        if (temp != null) {
+                            mode = temp[temp.length - 1];
+                        }
+                    })
                     if (content == "all") {
+                        // Install all
                         pkgs.forEach(pkg => {
                             System.loadSystemApps(pkg.scripts);
                         })
-                        api.createLine(`${pkgs.length} package(s) installed.`);
+                        api.createLine(`${pkgs.length} package(s) installed.`, "green");
+                    } else if (mode.search("--multiple") > -1) {
+                        // Install multiple packages
+                        var content = content.replace(mode, "");
+                        var mode = mode.replace("--multiple", "");
+                        mode = mode.replace("-", "");
+                        if (mode != "index" && mode != "name") {
+                            return api.createLineFromArray([
+                                `The type "${mode}" doesn't exist.`,
+                                `Please use "package install <packages> --multiple-<type>" to install multiple packages.`,
+                                `<packages> : Use spaces to separate indexes or names`,
+                                `<type> : index, name`,
+                            ], "red", true);
+                        }
+                        var specified = content.trim().split(" ");
+                        var pkg_count = 0;
+                        pkgs.forEach((pkg, i) => {
+                            console.log(i, ",", specified.includes(i.toString()), ",", specified.includes(pkg.name))
+                            if (mode == "index") {
+                                if (specified.includes(i.toString())) {
+                                    pkg_count++;
+                                    System.loadSystemApps(pkg.scripts, () => {
+                                        api.createLine(`Package "${formatString(i)}" installed.`, "green");
+                                    });
+                                }
+                            } else if (mode == "name") {
+                                if (specified.includes(pkg.name)) {
+                                    pkg_count++;
+                                    System.loadSystemApps(pkg.scripts, () => {
+                                        api.createLine(`Package "${formatString(pkg.name)}" installed.`, "green");
+                                    });
+                                }
+                            }
+                        })
+                        if (pkg_count == 0) {
+                            api.createLine(`No packages found.`, "red");
+                        }
                     } else if (pkgs[content]) {
+                        // Install by index
                         System.loadSystemApps(pkgs[content].scripts);
-                        api.createLine(`Package "${content}" installed.`);
+                        api.createLine(`Package "${content}" installed.`, "green");
                     } else {
                         var script = null;
                         var name = null;
@@ -181,29 +248,76 @@
                             }
                         })
                         if (script != null) {
+                            // Install by name
                             return System.loadSystemApps(script, () => {
-                                api.createLine(`Package "${formatString(name)}" installed.`);
+                                api.createLine(`Package "${formatString(name)}" installed.`, "green");
                             });
                         } else {
                             return api.createLineFromArray([
-                                `Please use "package install [all|index|name]" to install the packages,`,
-                                `and use "package list" to list all the packages`
-                            ], "error");
+                                `'${formatString(content)}' is not a available package.`,
+                                `Please use "package install [all|index|name] [--multiple-[index|name]]" to install the packages,`,
+                                `and use "package list" to list all the packages.`
+                            ], "red");
                         }
                     }
                 },
                 list: (content, id) => {
                     var api = generateResponse(id);
                     var table = {
-                        name: [],
-                        index: []
+                        "Name": [],
+                        "Index": []
                     };
                     pkgs.forEach((pkg, i) => {
-                        table.name.push(pkg.name)
-                        table.index.push(i)
+                        table["Name"].push(pkg.name)
+                        table["Index"].push(i)
                     })
                     api.createTable(table)
                     return;
+                },
+                __err: (content, id, code) => {
+                    var api = generateResponse(id);
+                    return api.createLineFromArray([
+                        `'${formatString(content)}' is not a valid package command.`,
+                        `Please use "package install [all|index|name] [--multiple-[index|name]]" to install the packages,`,
+                        `and use "package list" to list all the packages.`
+                    ], "red");
+                }
+            },
+            color: (content, id) => {
+                var api = generateResponse(id);
+                var colors = ["red", "yellow", "green", "white", "default"];
+
+                if (!colors[Number(content.trim())] || content.trim().length < 1) {
+                    api.createLineFromArray([
+                        `Please use "color <code>" to set the color of the terminal.`,
+                        `<code> : Displayed as follows.`
+                    ], "red", true);
+                    var table = api.createCustomTable();
+                    var color_col = table.createCol();
+                    var code_col = table.createCol();
+
+                    color_col.createRow("Colors");
+                    code_col.createRow("Codes");
+
+                    colors.forEach((color, i) => {
+                        color_col.createRow(color, [`terminal-line-${color}`]);
+                        code_col.createRow(i);
+                    })
+                    return;
+                } else {
+                    if (colors[Number(content.trim())] == "default") {
+                        document.head.querySelectorAll(`[data-element="terminal-style"]`).forEach(style => {
+                            style.remove();
+                        })
+                    } else {
+                        var style = document.createElement("style");
+                        style.setAttribute("data-element", "terminal-style");
+                        style.innerHTML = `[app-hash-content="${app.hash}"] .terminal * {
+                        --terminal-border-color: var(--terminal-color-${colors[Number(content.trim())]});
+                        color: var(--terminal-color-${colors[Number(content.trim())]}) !important;
+                    }`;
+                        document.head.appendChild(style);
+                    }
                 }
             },
             version: (content, id) => {
@@ -232,16 +346,25 @@
             },
             prank: (content, id) => {
                 var api = generateResponse(id);
-                var line_length = isCustomNumber(content) ? content : 300;
+                var line_length = isCustomNumber(content) ? content : 1000;
                 var created = 0;
                 function write() {
                     api.createLine(randomString(terminal_lines.offsetWidth / 7.5));
                     created++;
                     if (created < line_length) {
-                        setTimeout(write, 50);
+                        setTimeout(write, 25);
                     }
                 }
                 write();
+            },
+            net: {
+                open: (content, id) => {
+                    var api = generateResponse(id);
+                    System.loadSystemApps(["packages/webviewer/app"], () => {
+                        window.webViewer.open(content);
+                        api.createLine(`Opened "<a href="${content}" target="_blank">${formatString(content)}</a>" successfully.`);
+                    });
+                }
             }
         }
 
@@ -249,37 +372,44 @@
             console.log(cmd)
             var api = generateResponse(id);
             if (current[cmd[0]]) {
-                if (isFunction(current[cmd[0]])) {
+                if (isFunction(current[cmd[0]]) && current[cmd[0]].name.slice(0, 2) != "__") {
                     return current[cmd[0]](cmd.slice(1).join(" "), id);
                 } else if (cmd.length == 1) {
                     var list = Object.keys(current[cmd[0]]);
-                    if (list.length == 0) {
-                        api.createLineFromArray([
-                            `'${formatString(cmd.join(" "))}' is not recognized as an internal or external command,`,
-                            `operable program or batch file.`,
-                            '',
-                            `Type "help" for available commands`
-                        ], "error")
-                    } else if (list.length > 0) {
-                        api.createLineFromArray(Object.keys(current[cmd[0]]));
+                    if (list.length < 1) {
+                        if (isFunction(current["__err"])) {
+                            current["__err"](current[cmd[0]].name.slice(0, 2) == "__" ? cmd.join(" ") : cmd.slice(1).join(" "), id, "0");
+                        } else {
+                            api.createLineFromArray([
+                                `'${formatString(cmd.join(" "))}' is not recognized as an internal or external command,`,
+                                `operable program or batch file.`,
+                                '',
+                                `Type "help" for available commands`
+                            ], "red")
+                        }
                     } else {
-                        api.createLineFromArray([
-                            `'${formatString(cmd.join(" "))}' is not recognized as an internal or external command,`,
-                            `operable program or batch file.`,
-                            '',
-                            `Type "help" for available commands`
-                        ], "error")
+                        var command_list = Object.keys(current[cmd[0]]);
+                        command_list.forEach((command, i) => {
+                            if (command.slice(0, 2) == "__") {
+                                command_list.splice(i, 1);
+                            }
+                        })
+                        api.createLineFromArray(command_list);
                     }
                 } else {
                     cmdParser(cmd.slice(1), id, current[cmd[0]]);
                 }
             } else {
-                api.createLineFromArray([
-                    `'${formatString(Array.isArray(cmd) ? cmd.join(" ") : "")}' is not recognized as an internal or external command,`,
-                    `operable program or batch file.`,
-                    '',
-                    `Type "help" for available commands`
-                ], "error");
+                if (isFunction(current["__err"])) {
+                    return current["__err"](Array.isArray(cmd) ? cmd.join(" ") : "", id, "0");
+                } else {
+                    api.createLineFromArray([
+                        `'${formatString(Array.isArray(cmd) ? cmd.join(" ") : "")}' is not recognized as an internal or external command,`,
+                        `operable program or batch file.`,
+                        '',
+                        `Type "help" for available commands`
+                    ], "red");
+                }
             }
         }
 
@@ -320,7 +450,7 @@
                 }
 
                 if (e.keyCode == 40) {
-                    current_index < type_history.length - 1 ? (current_index++) : current_index;
+                    current_index < type_history.length - 1 ? (current_index++) : (current_index = type_history.length - 1);
                     terminal_input.value = type_history[current_index];
                     // terminal_input.selectionStart = terminal_input.value.length;
                     e.preventDefault();
@@ -391,7 +521,7 @@
                 lines.forEach((line, i) => {
                     if (i == 0) {
                         var line = line.split(" ");
-                        html += `<div class="terminal-line"><span class="terminal-line-warning">${formatString(line[0])}</span> ${formatString(line.slice(1).join(' '))}</div>`;
+                        html += `<div class="terminal-line"><span class="terminal-line-yellow">${formatString(line[0])}</span> ${formatString(line.slice(1).join(' '))}</div>`;
                     } else {
                         html += `<div class="terminal-line">${formatString(line)}</div>`
                     }

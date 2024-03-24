@@ -1,11 +1,27 @@
 [
     {
+        "name": "Command",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/cmd/app"
+        ],
+        "version": "1.2.0"
+    },
+    {
         "name": "Web Browser",
         "author": "WebOS, Siyu1017",
         "scripts": [
             "browser/app"
         ],
         "version": "1.1.0"
+    },
+    {
+        "name": "Windows12 Theme",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/windows12-theme/app"
+        ],
+        "version": "1.0.0"
     },
     {
         "name": "Youtube Downloader",
@@ -20,22 +36,6 @@
         "author": "WebOS, Siyu1017",
         "scripts": [
             "packages/genshinimpact/app"
-        ],
-        "version": "1.0.0"
-    },
-    {
-        "name": "Command",
-        "author": "WebOS, Siyu1017",
-        "scripts": [
-            "packages/cmd/app"
-        ],
-        "version": "1.2.0"
-    },
-    {
-        "name": "Windows12 Theme",
-        "author": "WebOS, Siyu1017",
-        "scripts": [
-            "packages/windows12-theme/app"
         ],
         "version": "1.0.0"
     },

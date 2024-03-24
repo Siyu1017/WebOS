@@ -396,6 +396,12 @@ class App {
 	}
 	close() {
 		delete running_apps[this.hash];
+		if (this.parent) {
+			this.parent.remove();
+		}
+		if (this.app_icon) {
+			this.app_icon.remove();
+		}
 	}
 	loadStyles(content, type, callback = function () {}) {
 		if (type == "text") {
