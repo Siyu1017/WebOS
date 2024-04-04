@@ -3,7 +3,7 @@ body {
     overflow: hidden;
 }
 
-* {
+.editor * {
     color: #cccccc;
     user-select: none;
     font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica Neue, sans-serif;
