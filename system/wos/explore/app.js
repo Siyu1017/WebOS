@@ -39,7 +39,13 @@
     }
 
     System.loadSystemApps = (apps, callback) => {
-        System.loadApp(0, apps, callback)
+        var loaded = 0;
+        System.loadApp(0, apps, () => {
+            loaded++;
+            if (loaded == apps.length) {
+                callback();
+            }
+        })
     }
     window.onload = async () => {
         var explore = new App(null, null, {
@@ -106,10 +112,74 @@
         imgLoad("./application.png")
 
         await System.loadApp(0, ["pkgmgr/app", "time/app", "gotodesktop/app"]);
+
         (async (status) => {
-            await delay(500)
+            await delay(500);
             System.hideStartLoading();
-        })()
+        })();
+
+        function openFullscreen() {
+            var elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        document.querySelector('[data-action="explore:enable-fullscreen"]').addEventListener("click", (e) => {
+            try {
+                openFullscreen();
+                document.querySelector(".window-alert-container").classList.add("hide");
+            } catch (e) {
+                new App("ERROR" + Date.now(), null, {
+                    x: window.innerWidth / 2 - 120,
+                    y: (window.innerHeight - 45) / 2 - 60,
+                    width: 240,
+                    height: 120,
+                    movable: false,
+                    minimizable: false,
+                    fullscreenable: false,
+                    title: "Error",
+                    icon: "./error.png"
+                }).execute('<div style="height: calc(100% - 36px);width: calc(100% - 24px);display: flex;justify-content: center;align-items: center;padding: 18px 12px;user-select: none;-webkit-user-drag: none;"><img src="./error.png" style="width: 36px;height: 36px;margin-right: 6px;-webkit-user-drag: none;"><span style="overflow: hidden;max-height: 4rem;-webkit-line-clamp: 2;display: -webkit-box;-webkit-box-orient: vertical;text-overflow: ellipsis;white-space: normal;word-wrap: break-word;">' + e.message + "</span></div>");
+            }
+        })
+
+        window.focus();
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'F11') {
+                document.documentElement.requestFullscreen();
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("fullscreenchange", (e) => {
+            if (document.fullscreenElement) {
+                document.querySelector(".window-alert-container").classList.add("hide");
+            } else {
+                document.querySelector(".window-alert-container").classList.remove("hide");
+            }
+        })
+
+        /*
+        var checkOrientation = function () {
+            mode = Math.abs(window.orientation) == 90 ? 'landscape' : 'portrait';
+            if (mode == 'landscape') {
+                document.querySelector(".window-alert-container").classList.add("hide");
+            } else {
+                document.querySelector(".window-alert-container").classList.remove("hide");
+            }
+        };
+
+        checkOrientation();
+
+        window.addEventListener("resize", checkOrientation, false);
+        window.addEventListener("orientationchange", checkOrientation, false);
+        */
     }
 
     window.System = System;

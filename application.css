@@ -136,7 +136,7 @@ svg {
 	-ms-user-select: none;
 	user-select: none;
 	-webkit-backdrop-filter: saturate(3) blur(20px);
-    backdrop-filter: saturate(3) blur(20px);
+	backdrop-filter: saturate(3) blur(20px);
 }
 
 img.window-tool-bar-application-icon-image {
@@ -160,7 +160,8 @@ img.window-tool-bar-application-icon-image {
 	margin-left: 12px;
 }
 
-.window-tool-bar-application.active, .window-tool-bar-application:hover {
+.window-tool-bar-application.active,
+.window-tool-bar-application:hover {
 	background: rgba(255, 255, 255, .67);
 	border-radius: 4px;
 }
@@ -283,7 +284,8 @@ img.window-tool-bar-application-icon-image {
 	margin: 0 0 0 auto;
 }
 
-.window-tool-bar-system:not(.window-tool-bar-system:hover), .window-tool-bar-system.active {
+.window-tool-bar-system:not(.window-tool-bar-system:hover),
+.window-tool-bar-system.active {
 	opacity: 1 !important;
 }
 
@@ -307,7 +309,8 @@ img.window-tool-bar-application-icon-image {
 	justify-content: center;
 }
 
-.window-tool-bar-system:hover, .window-tool-bar-system.active {
+.window-tool-bar-system:hover,
+.window-tool-bar-system.active {
 	background: rgba(255, 255, 255, .5);
 }
 
@@ -378,39 +381,39 @@ img.window-tool-bar-application-icon-image {
 }
 
 .window-tool-bar-return-desktop {
-    width: 8px;
-    height: 100%;
-    margin: 0 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	width: 8px;
+	height: 100%;
+	margin: 0 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .window-tool-bar-return-desktop::before {
-    height: 16px;
-    width: 2px;
-    border-radius: 99px;
-    content: '';
-    display: block;
-    background: #a1a1a1;
-    transition: all .05s ease-in-out;
-    opacity: 0;
+	height: 16px;
+	width: 2px;
+	border-radius: 99px;
+	content: '';
+	display: block;
+	background: #a1a1a1;
+	transition: all .05s ease-in-out;
+	opacity: 0;
 }
 
 .window-tool-bar-return-desktop:hover::before {
-    opacity: 1;
+	opacity: 1;
 }
 
 .window-frame-application-loading {
 	height: calc(100% - 30px);
-    width: 100%;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	width: 100%;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	background: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	opacity: 0;
 	z-index: 0;
 	transition: all .1s ease-in-out;
@@ -430,4 +433,60 @@ img.window-tool-bar-application-icon-image {
 .window-frame-application-loading.active .webos-loading-spinner>circle {
 	stroke: #0069c4;
 	stroke-width: 1px;
+}
+
+.window-alert-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	backdrop-filter: blur(20px);
+	z-index: 999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.window-alert {
+	width: fit-content;
+	max-width: min(420px, 60vw);
+	max-height: min(360px, 80vh);
+	background: #fff;
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.12);
+}
+
+.window-alert-content {
+	padding: 24px 24px;
+	overflow: auto;
+	max-height: 100%;
+}
+
+.window-alert-title {
+	font-weight: 600;
+	font-size: 1.5rem;
+	margin-bottom: .75rem;
+}
+
+.window-alert-line {
+	margin-block-start: 1em;
+	margin-inline-start: 0px;
+	margin-inline-end: 0px;
+}
+
+.window-alert-footer {
+	border-top: 1px solid #ddd;
+	background: #f3f3f3;
+	padding: .75rem 1.5rem;
+	text-align: right;
+	position: sticky;
+	bottom: 0;
+}
+
+.window-alert-container.hide {
+	display: none;
 }
