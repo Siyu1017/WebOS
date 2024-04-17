@@ -1,4 +1,17 @@
 (async function () {
+    const mode = "dev";
+
+    function getJsonFromUrl(url) {
+        if (!url) url = location.search;
+        var query = url.substr(1);
+        var result = {};
+        query.split("&").forEach(function (part) {
+            var item = part.split("=");
+            result[item[0]] = decodeURIComponent(item[1]);
+        });
+        return result;
+    }
+
     var explore_datas = {
         executing_apps: [],
     }
@@ -26,7 +39,7 @@
             if (curr == arr.length - 1) {
                 return callback();
             }
-            System.loadApp(curr + 1, arr);
+            System.loadApp(curr + 1, arr, callback);
         }
     }
 
@@ -38,7 +51,7 @@
         $("#loading").classList.remove("active");
     }
 
-    System.loadSystemApps = (apps, callback) => {
+    System.loadSystemApps = (apps, callback = function () { }) => {
         var loaded = 0;
         System.loadApp(0, apps, () => {
             loaded++;
@@ -47,6 +60,7 @@
             }
         })
     }
+
     window.onload = async () => {
         var explore = new App(null, null, {
             showinbar: false,
@@ -111,7 +125,19 @@
         }
         imgLoad("./application.png")
 
-        await System.loadApp(0, ["pkgmgr/app", "time/app", "gotodesktop/app"]);
+        await System.loadApp(0, ["fs/app", "pkgmgr/app", "time/app", "gotodesktop/app"], async () => {
+            if (getJsonFromUrl().command) {
+                window._cmdcallback = (api) => {
+                    var lines = getJsonFromUrl().command;
+                    lines.split('\\n').forEach(line => {
+                        api.runCommand(line);
+                    })
+                };
+                await System.loadSystemApps(["packages/cmd/app"], () => {
+                    window._cmdcallback = undefined;
+                });
+            }
+        });
 
         (async (status) => {
             await delay(500);
@@ -150,20 +176,24 @@
 
         window.focus();
 
-        window.addEventListener('keydown', (event) => {
-            if (event.key === 'F11') {
-                document.documentElement.requestFullscreen();
-                event.preventDefault();
-            }
-        });
+        if (mode != "dev") {
+            window.addEventListener('keydown', (event) => {
+                if (event.key === 'F11') {
+                    document.documentElement.requestFullscreen();
+                    event.preventDefault();
+                }
+            });
 
-        window.addEventListener("fullscreenchange", (e) => {
-            if (document.fullscreenElement) {
-                document.querySelector(".window-alert-container").classList.add("hide");
-            } else {
-                document.querySelector(".window-alert-container").classList.remove("hide");
-            }
-        })
+            window.addEventListener("fullscreenchange", (e) => {
+                if (document.fullscreenElement) {
+                    document.querySelector(".window-alert-container").classList.add("hide");
+                } else {
+                    document.querySelector(".window-alert-container").classList.remove("hide");
+                }
+            })
+        } else {
+            document.querySelector(".window-alert-container").classList.add("hide");
+        }
 
         /*
         var checkOrientation = function () {

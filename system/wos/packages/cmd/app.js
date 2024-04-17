@@ -1,4 +1,4 @@
-(async function () {
+(async function (callback = function () {}) {
     var app = new App(null, "", {
         width: 420,
         height: 300,
@@ -53,11 +53,18 @@
         return `${fontWeight} ${fontSize} ${fontFamily}`;
     }
 
-    function formatString(str) {
+    function omitString(org) {
+        if (org.length <= 21) return org;
+        return org.slice(0, 11) + "…" + org.slice(-9)
+    }
+
+    function formatString(str, omit = false) {
         console.log(str)
         try {
+            if (omit == true) {
+                str = omitString(str);
+            }
             return str.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-
         } catch (e) {
             return str;
         }
@@ -323,18 +330,15 @@
             version: (content, id) => {
                 var api = generateResponse(id);
                 return api.createLineFromArray([`Version: ${HACK_PANEL_VERSION}`])
-            }
-            ,
+            },
             date: (content, id) => {
                 var api = generateResponse(id);
                 return api.createLineFromArray([new Date(Date.now()).format("yyyy/MM/dd")])
-            }
-            ,
+            },
             time: (content, id) => {
                 var api = generateResponse(id);
                 return api.createLineFromArray([new Date(Date.now()).format("hh:mm:ss")])
-            }
-            ,
+            },
             help: (content, id) => {
                 var api = generateResponse(id);
                 return api.createLineFromArray(Object.keys(command_list).sort())
@@ -365,6 +369,9 @@
                         api.createLine(`Opened "<a href="${content}" target="_blank">${formatString(content)}</a>" successfully.`);
                     });
                 }
+            },
+            exit: (content, id) => {
+                app.close();
             }
         }
 
@@ -404,7 +411,7 @@
                     return current["__err"](Array.isArray(cmd) ? cmd.join(" ") : "", id, "0");
                 } else {
                     api.createLineFromArray([
-                        `'${formatString(Array.isArray(cmd) ? cmd.join(" ") : "")}' is not recognized as an internal or external command,`,
+                        `'${formatString(Array.isArray(cmd) ? cmd.join(" ") : ""/*, true*/)}' is not recognized as an internal or external command,`,
                         `operable program or batch file.`,
                         '',
                         `Type "help" for available commands`
@@ -515,6 +522,9 @@
         terminal_input.onkeypress = (e) => {
             // console.log(e.keyCode, e.key, e.which)
             if (e.keyCode == 13 && !e.shiftKey) {
+                e.preventDefault();
+                runCommand(terminal_input.value);
+                /*
                 var lines = terminal_input.value.split("\n");
                 var line_id = randomString(96);
                 var html = "";
@@ -533,25 +543,61 @@
                 } else {
                     terminal_lines.querySelector(`[data-id="${line_id}"]`).remove();
                 }
+                */
+                // ---------------------------------------------------------------- //
                 /*console.log(result)
                 Array.isArray(result) && result.forEach(line => {
                     print += `<div class="terminal-line">${line == "" ? "<br>" : formatString(line)}</div>`
                 });*/
-
-
-                type_history.push(terminal_input.value)
-                terminal_input.value = "";
-                setTimeout(() => {
-                    terminal.scrollTop = terminal.scrollHeight;
-                }, 200)
-                e.preventDefault();
-                current_index = type_history.length;
+                // ---------------------------------------------------------------- //
+                /*
+                                type_history.push(terminal_input.value)
+                                terminal_input.value = "";
+                                setTimeout(() => {
+                                    terminal.scrollTop = terminal.scrollHeight;
+                                }, 200)
+                                e.preventDefault();
+                                current_index = type_history.length;
+                                */
             }
 
             setTimeout(() => {
                 terminal_typein.style.height = "10px";
                 terminal_typein.style.height = terminal_input.scrollHeight + 'px';
             }, 100);
+        }
+
+        function runCommand(command) {
+            var lines = command.split("\n");
+            var line_id = randomString(96);
+            var html = "";
+            lines.forEach((line, i) => {
+                if (i == 0) {
+                    var line = line.split(" ");
+                    html += `<div class="terminal-line"><span class="terminal-line-yellow">${formatString(line[0])}</span> ${formatString(line.slice(1).join(' '))}</div>`;
+                } else {
+                    html += `<div class="terminal-line">${formatString(line)}</div>`
+                }
+            })
+            terminal_lines.innerHTML += `<div class="terminal-group" style="margin: 0"><span class="terminal-path">${formatString(path + ">")}</span><div class="terminal-typed">${html}</div></div><div class="terminal-group" style="flex-direction: column;" data-id="${line_id}"></div>`;
+
+            if (command.trim().length > 0) {
+                cmdParser(command.trim().split(" "), line_id);
+            } else {
+                terminal_lines.querySelector(`[data-id="${line_id}"]`).remove();
+            }
+            /*console.log(result)
+            Array.isArray(result) && result.forEach(line => {
+                print += `<div class="terminal-line">${line == "" ? "<br>" : formatString(line)}</div>`
+            });*/
+
+
+            type_history.push(command)
+            terminal_input.value = "";
+            setTimeout(() => {
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 200)
+            current_index = type_history.length;
         }
 
         await fetch("./system/packages.json").then(res => {
@@ -564,6 +610,7 @@
         });
 
         app.hideLoading();
+        return callback({ runCommand });
     }, 200)
 }
-)();
+)(window._cmdcallback || function () {});

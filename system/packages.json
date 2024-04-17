@@ -16,6 +16,14 @@
         "version": "1.1.0"
     },
     {
+        "name": "Personal",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/personal/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
         "name": "Windows12 Theme",
         "author": "WebOS, Siyu1017",
         "scripts": [

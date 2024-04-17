@@ -1,0 +1,80 @@
+.personal {
+    height: fit-content;
+    display: grid;
+    justify-items: center;
+    grid-template-columns: repeat(2, 150px);
+    gap: 8px;
+}
+
+.personal-theme {
+    width: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: fit-content;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all .2s ease-in-out;
+    box-sizing: border-box;
+    background: none;
+}
+
+.personal-theme .webos-loading-spinner {
+    display: none;
+}
+
+.personal-theme.loading {
+    opacity: .7;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.personal-theme.loading .webos-loading-spinner {
+    display: block;
+    position: absolute;
+    width: 32px;
+    height: 32px;
+}
+
+img.theme-image {
+    width: -webkit-fill-available;
+    height: -webkit-fill-available;
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+.personal-window {
+    backdrop-filter: blur(16px) saturate(1.8);
+    background: rgba(241, 241, 241, 0.85);
+    transition: background .2s ease-in-out, color .2s ease-in-out;
+}
+
+[data-theme="dark"] {
+    .window-tool-bar-application.active,
+    .window-tool-bar-application:hover,
+    .window-tool-bar-system:hover,
+    .window-tool-bar-system.active {
+        background: rgba(255, 255, 255, .1) !important;
+    }
+
+    .window-tool-bar-system-time {
+        color: #fff;
+    }
+
+    .window-tool-bar {
+        background: rgba(32, 32, 32, .75);
+    }
+}
+
+.personal-theme.active {
+    border: 3px solid var(--windows11-ui-input-defualt-color);
+}
+
+[data-theme="dark"] .personal-window {
+    background: rgb(26 26 26 / 84%) !important;
+    color: #fff;
+}

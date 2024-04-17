@@ -716,7 +716,7 @@ class App {
 				}
 			})
 
-			parent.addEventListener("click", (e) => {
+			parent.addEventListener("mousedown", (e) => {
 				if (mini != false) {
 					if (e.target == mini || mini.contains(e.target)) return;
 				}
