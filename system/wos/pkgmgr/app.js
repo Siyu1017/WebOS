@@ -39,7 +39,7 @@
             frame.elements.window.style.left = window.innerWidth / 2 - 210 + "px";
             frame.elements.window.style.top = (window.innerHeight - 45) / 2 - 150 + "px";
         }, true)
-        frame.elements.window.classList.add('wui-system');
+        frame.elements.window.classList.add('wui-system-light');
         return;
     })
 

@@ -1,5 +1,5 @@
 (async function () {
-    const mode = ".";
+    const mode = "dev";
 
     function getJsonFromUrl(url) {
         if (!url) url = location.search;
@@ -17,6 +17,8 @@
     }
     var delay = (delayInms) => { return new Promise(resolve => setTimeout(resolve, delayInms)); };
     var System = {};
+
+    window.webos = {};
 
     /*
     System.loadApp = function (app) {

@@ -1,13 +1,23 @@
 .personal {
     height: fit-content;
-    display: grid;
+    width: -webkit-fill-available;
+}
+
+.personal-background {
+    display: flex;
     justify-items: center;
-    grid-template-columns: repeat(2, 150px);
     gap: 8px;
+    width: fit-content;
+    overflow: auto;
+    display: flex;
+    max-width: 100%;
+    padding: .5rem;
+    box-sizing: border-box;
 }
 
 .personal-theme {
     width: 150px;
+    min-width: 150px;
     border-radius: 8px;
     overflow: hidden;
     height: fit-content;
@@ -77,4 +87,9 @@ img.theme-image {
 [data-theme="dark"] .personal-window {
     background: rgb(26 26 26 / 84%) !important;
     color: #fff;
+}
+
+.personal-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
 }

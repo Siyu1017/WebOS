@@ -1,4 +1,4 @@
-(async function (callback = function () {}) {
+(async function (callback = function () { }) {
     var app = new App(null, "", {
         width: 420,
         height: 300,
@@ -59,7 +59,7 @@
     }
 
     function formatString(str, omit = false) {
-        console.log(str)
+        // console.log(str)
         try {
             if (omit == true) {
                 str = omitString(str);
@@ -372,6 +372,23 @@
             },
             exit: (content, id) => {
                 app.close();
+            },
+            run: (content, id) => {
+                var command = content.split(" ")[0].split(".");
+                var api = generateResponse(id);
+                if (command[0] == "webos") {
+                    command = command.slice(1);
+                    console.log(command)
+                    if (!window.webos[command[0]]) {
+                        console.log(1)
+                        return api.createLine(`Missing script: "${content}"`, "red", true);
+                    }
+                    if (typeof window.webos[command[0]][command[1]] != "function") {
+                        console.log(2, typeof window.webos[command[0]][command[1]], command[1])
+                        return api.createLine(`Missing script: "${content}"`, "red", true);
+                    }
+                    return window.webos[command[0]][command[1]](content.replace(content.split(" ")[0], "").trim());
+                }
             }
         }
 
@@ -610,7 +627,12 @@
         });
 
         app.hideLoading();
+
+        window.webos.cmd = {
+            runCommand
+        }
+
         return callback({ runCommand });
     }, 200)
 }
-)(window._cmdcallback || function () {});
+)(window._cmdcallback || function () { });
