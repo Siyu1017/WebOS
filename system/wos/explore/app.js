@@ -1,5 +1,5 @@
 (async function () {
-    const mode = "dev";
+    const mode = ".";
 
     function getJsonFromUrl(url) {
         if (!url) url = location.search;
