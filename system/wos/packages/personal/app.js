@@ -19,13 +19,13 @@
     </div>
     <div class="personal-group theme">
         <div class="personal-title">Theme</div>
-        <div class="select" data-select="personal-theme">
-        <div class="select-default">Choose...</div>
-        <div class="select-popup">
-            <div class="select-group">
-                <div class="select-item selected" value="light">Light</div>
-                <div class="select-item" value="dark">Dark</div>
-                <div class="select-item disabled" value="custom">Custom</div>
+        <div class="unique-select" data-select="personal-theme">
+        <div class="unique-select-default">Choose...</div>
+        <div class="unique-select-popup">
+            <div class="unique-select-group">
+                <div class="unique-select-item selected" value="light">Light</div>
+                <div class="unique-select-item" value="dark">Dark</div>
+                <div class="unique-select-item disabled" value="custom">Custom</div>
             </div>
     </div>
         </div>
