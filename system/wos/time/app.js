@@ -8,8 +8,13 @@
 		x: window.innerWidth,
 		toolbar: false
 	}).execute(`<div class="wos-time"><div class="wos-time-clock"></div></div>`);
+	/*
 	app.elements.content.style = "padding: 10px;box-sizing: border-box;backdrop-filter: blur(16px) saturate(1.8);background: rgb(241 241 241 / 71%);height: 100%;";
 	app.elements.window.style = "display: block;width: fit-content;box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 15px 5px;bottom: 8px;transition: all 0.15s ease-in-out 0s;height: calc(100% - 16px);left: calc(-173px + 100vw);z-index: 15;border: 1px solid #c2c2c2;width: 240px;";
+	*/
+
+	app.elements.window.classList.add("wos-time-window");
+	app.elements.content.classList.add("wos-time-content");
 
 	var now = new Date(Date.now());
 

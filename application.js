@@ -29,25 +29,27 @@ var dragger = (t, c) => {
 		events = {
 			"dragstart": {
 				target: config.start,
-				event: "mousedown"
+				event: ["mousedown", "touchstart", "pointerdown"]
 			},
 			"dragging": {
 				target: config.move,
-				event: "mousemove"
+				event: ["mousemove", "touchmove", "pointermove"]
 			},
 			"dragend": {
 				target: config.end,
-				event: "mouseup"
+				event: ["mouseup", "touchend", "pointerup"]
 			},
 			"dragout": {
 				target: config.blur,
-				event: "blur"
+				event: ["blur"]
 			}
 		};
 
 	function on(evt, fn) {
 		if (events.hasOwnProperty(evt) == false) return;
-		events[evt].target.addEventListener(events[evt].event, e => fn(e));
+		events[evt].event.forEach(event => {
+			events[evt].target.addEventListener(event, e => fn(e));
+		})
 	}
 
 	function inarea(element1, element2, callback) {
@@ -188,12 +190,309 @@ function isRGBColorSimilar(color1, color2, threshold) {
 
 var App_data = {};
 
+class APP_Mover {
+	/**
+	 * 
+	 * @param {Element} app 
+	 * @param {Element} mask 
+	 * @param {Element} toolbar 
+	 * @param {Element} toolbarControls 
+	 * @param {Element} toolbarToggleFull 
+	 * @param {Object} config 
+	 */
+	constructor(app, mask, toolbar, toolbarControls, toolbarToggleFull, config, func, token) {
+		var last = {
+			x: 0,
+			y: 0
+		}
+		var settings = {
+			barHeight: 45,
+			minOver: 30,
+			boundary: 16,
+			preview: 6
+		}
+
+		var app_mask = mask;
+		var app_pos_preview = $(".reps");
+		var app_toolbar = toolbar;
+		var app_toolbar_controls = toolbarControls;
+		var app_toolbar_toggle_full = toolbarToggleFull;
+		var pos = ["lt", "lf", "lb", "rt", "rf", "rb", "f"];
+		var app_data = {
+			width: 420,
+			height: 300,
+			left: 0,
+			top: 0,
+			boundary: null,
+			useBoundary: false,
+			fullMode: false,
+			dragging: false
+		}
+		if (config.fullscreen == true) {
+			app_data.fullMode = true;
+			app.style.borderRadius = 0;
+			app_data.boundary = "f";
+		}
+		function Module_Comparator(_custom, _default, _config) {
+			var _default_arrs = {
+				keys: Object.keys(_default),
+				values: Object.values(_default)
+			},
+				res = {};
+			_default_arrs.values.forEach((default_value, i) => {
+				if (_custom.hasOwnProperty(_default_arrs.keys[i])) {
+					res[_default_arrs.keys[i]] = _custom[_default_arrs.keys[i]]
+				} else {
+					res[_default_arrs.keys[i]] = default_value;
+				}
+			})
+			return res;
+		}
+		if (config) {
+			if (!Object.prototype.toString.call(config) === '[object Object]') { } else {
+				app_data = Module_Comparator(config, app_data);
+			}
+		}
+		var last_pos = null;
+		var events = {
+			"start": ["mousedown", "touchstart", "pointerdown"],
+			"move": ["mousemove", "touchmove", "pointermove"],
+			"end": ["mouseup", "touchend", "pointerup", "blur"]
+		}
+
+		function offset(el) {
+			var rect = el.getBoundingClientRect(),
+				scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+				scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+			return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
+		}
+
+		function getPosition(element) {
+			return { x: offset(element).left, y: offset(element).top };
+		}
+
+		function formatPos(pos, pre) {
+			var res = {
+				left: pre == true ? settings.preview : 0,
+				top: pre == true ? settings.preview : 0,
+				width: pre == true ? window.innerWidth - settings.preview * 2 : window.innerWidth,
+				height: pre == true ? (window.innerHeight - settings.barHeight) / 2 - settings.preview * 2 : (window.innerHeight - settings.barHeight) / 2
+			}
+			if (pos.search("f") > -1) {
+				res.height = pre == true ? window.innerHeight - settings.barHeight - settings.preview * 2 : window.innerHeight - settings.barHeight;
+			}
+			if (pos != "f") {
+				res.width = pre == true ? window.innerWidth / 2 - settings.preview * 2 : window.innerWidth / 2;
+			}
+			if (pos.search("r") > -1) {
+				res.left = pre == true ? window.innerWidth / 2 + settings.preview : window.innerWidth / 2;
+			}
+			if (pos.search("b") > -1) {
+				res.top = pre == true ? (window.innerHeight - settings.barHeight) / 2 + settings.preview : (window.innerHeight - settings.barHeight) / 2;
+			}
+			return pos ? res : null;
+		}
+
+		app_toolbar_toggle_full.addEventListener("click", () => {
+			if (app_data.boundary == null && app_data.fullMode == false) {
+				app_data.useBoundary = false;
+			}
+			if (app_data.fullMode == false) {
+				app.style.left = formatPos("f").left + "px";
+				app.style.top = formatPos("f").top + "px";
+				app.style.width = formatPos("f").width + "px";
+				app.style.height = formatPos("f").height + "px";
+				app.classList.add("window-frame-application-full-mode");
+				app_toolbar_toggle_full.classList.add("window-frame-application-toolbar-action-toggle-full-mode");
+				// app.style.borderRadius = 0;
+				app_data.fullMode = true;
+			} else {
+				app.style.left = (app_data.useBoundary == true ? formatPos(app_data.boundary).left : app_data.left) + "px";
+				app.style.top = (app_data.useBoundary == true ? formatPos(app_data.boundary).top : app_data.top) + "px";
+				app.style.width = (app_data.useBoundary == true ? formatPos(app_data.boundary).width : app_data.width) + "px";
+				app.style.height = (app_data.useBoundary == true ? formatPos(app_data.boundary).height : app_data.height) + "px";
+				app.classList.remove("window-frame-application-full-mode");
+				app_toolbar_toggle_full.classList.remove("window-frame-application-toolbar-action-toggle-full-mode");
+				app.style.borderRadius = app_data.useBoundary == true ? 0 : "revert-layer";
+				app_data.fullMode = false;
+			}
+		})
+
+		function handleStart(e) {
+			if (e.target != app_toolbar_controls && app_toolbar_controls.contains(e.target) == false) {
+				if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+					var touch = e.touches[0] || e.changedTouches[0];
+					e.pageX = touch.pageX;
+					e.pageY = touch.pageY;
+				}
+				last = {
+					x: e.pageX,
+					y: e.pageY
+				}
+				$(".window-frame-application-content-mask", true).forEach(mask => {
+					mask.style.display = "block";
+				})
+				$(".window-frame-application.focus", true).forEach(application => {
+					application.classList.remove("focus");
+				})
+				max_z_index += 2;
+				app_pos_preview.style.zIndex = max_z_index - 1;
+				app.style.zIndex = max_z_index;
+				app.classList.add("focus");
+				app_data.dragging = true;
+				app_mask.style.display = "block";
+				app_mask.focus();
+			} else {
+				app_data.dragging = false;
+				app_mask.style.display = "none";
+			}
+		}
+
+		function handleMove(e) {
+			if (app_data.dragging == false) return;
+			if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+				var touch = e.touches[0] || e.changedTouches[0];
+				e.pageX = touch.pageX;
+				e.pageY = touch.pageY;
+			}
+			app.classList.remove("window-frame-application-full-mode");
+			app_toolbar_toggle_full.classList.remove("window-frame-application-toolbar-action-toggle-full-mode");
+			app.style.width = app_data.width + "px";
+			app.style.height = app_data.height + "px";
+			app.style.borderRadius = "revert-layer";
+			app.style.pointerEvents = "none";
+			app.style.userSelect = "none";
+			app.style.boxShadow = "revert-layer";
+			app_data.fullMode = false;
+			// app.style.zIndex = "3";
+			if (getPosition(app).x + e.pageX - last.x < window.innerWidth - settings.minOver && getPosition(app).x + e.pageX - last.x + app.offsetWidth > settings.minOver + app_toolbar_controls.offsetWidth) {
+				app.style.left = getPosition(app).x + e.pageX - last.x + "px";
+			}
+			if (getPosition(app).y + e.pageY - last.y < window.innerHeight - settings.barHeight - settings.minOver && getPosition(app).y + e.pageY - last.y > 0) {
+				app.style.top = getPosition(app).y + e.pageY - last.y + "px";
+			}
+			var temp_pos = "";
+			if (e.pageX < settings.boundary || e.pageX > window.innerWidth - settings.boundary || e.pageY < settings.boundary) {
+				app_pos_preview.style.left = (e.pageX < 0 ? 0 : e.pageX > window.innerWidth ? window.innerWidth : e.pageX) + "px";
+				app_pos_preview.style.top = (e.pageY < 0 ? 0 : e.pageY > window.innerHeight - settings.barHeight ? window.innerHeight - settings.barHeight : e.pageY) + "px";
+				app_pos_preview.style.zIndex = max_z_index - 1;
+				app_pos_preview.classList.add("active");
+				if (e.pageX < settings.boundary) {
+					temp_pos += "l";
+					if (e.pageY < settings.boundary) {
+						temp_pos += "t";
+					} else if (e.pageY > window.innerHeight - settings.barHeight - settings.boundary) {
+						temp_pos += "b";
+					} else {
+						temp_pos += "f";
+					}
+				} else if (e.pageX > window.innerWidth - settings.boundary) {
+					temp_pos += "r";
+					if (e.pageY < settings.boundary) {
+						temp_pos += "t";
+					} else if (e.pageY > window.innerHeight - settings.barHeight - settings.boundary) {
+						temp_pos += "b";
+					} else {
+						temp_pos += "f";
+					}
+				} else {
+					temp_pos = "f"
+				}
+				if (app_data.boundary != temp_pos) {
+					app_data.boundary = temp_pos;
+				}
+				if (last_pos != formatPos(temp_pos)) {
+					last_pos = formatPos(temp_pos);
+					app_pos_preview.style.left = formatPos(temp_pos, true).left + "px";
+					app_pos_preview.style.top = formatPos(temp_pos, true).top + "px";
+					app_pos_preview.style.width = formatPos(temp_pos, true).width + "px";
+					app_pos_preview.style.height = formatPos(temp_pos, true).height + "px";
+				}
+			} else {
+				app_pos_preview.classList.remove("active");
+				app_data.boundary = null;
+				app_pos_preview.style.width = "";
+				app_pos_preview.style.height = "";
+				app_pos_preview.style.left = (e.pageX < 0 ? 0 : e.pageX > window.innerWidth ? window.innerWidth : e.pageX) + "px";
+				app_pos_preview.style.top = (e.pageY < 0 ? 0 : e.pageY > window.innerHeight - settings.barHeight ? window.innerHeight - settings.barHeight : e.pageY) + "px";
+			}
+			last = {
+				x: e.pageX,
+				y: e.pageY
+			}
+		}
+
+		function handleEnd() {
+			if (app_data.dragging == false) return;
+			app_data.left = getPosition(app).x;
+			app_data.top = getPosition(app).y;
+			if (app_data.boundary != null) {
+				app_data.useBoundary = true
+				app.style.left = formatPos(app_data.boundary).left + "px";
+				app.style.top = formatPos(app_data.boundary).top + "px";
+				app.style.width = formatPos(app_data.boundary).width + "px";
+				app.style.height = formatPos(app_data.boundary).height + "px";
+				app_data.fullMode = false;
+				if (app_data.boundary == "f") {
+					app.classList.add("window-frame-application-full-mode");
+					app_toolbar_toggle_full.classList.add("window-frame-application-toolbar-action-toggle-full-mode");
+					app_data.fullMode = true;
+					app_data.useBoundary = false;
+				} else {
+					app.classList.remove("window-frame-application-full-mode");
+					app_toolbar_toggle_full.classList.remove("window-frame-application-toolbar-action-toggle-full-mode");
+				}
+				app.style.borderRadius = 0;
+				app.style.boxShadow = "none";
+			} else {
+				app_data.useBoundary = false;
+				app.style.boxShadow = "revert-layer";
+			}
+			if (app_data.boundary != "f") {
+				app_data.left = getPosition(app).x;
+				app_data.top = getPosition(app).y;
+			}
+			$(".window-frame-application-content-mask", true).forEach(e => {
+				e.style.display = "none";
+			})
+			app.style.zIndex = max_z_index;
+			$(".window-frame-application.focus", true).forEach(e => {
+				e.classList.remove("focus");
+			})
+			app.classList.add("focus");
+			app_data.dragging = false;
+			app_mask.style.display = "none";
+			app_mask.blur();
+			app_pos_preview.classList.remove("active");
+			app_pos_preview.style.width = "";
+			app_pos_preview.style.height = "";
+			app.style.pointerEvents = "unset";
+			app.style.userSelect = "unset";
+			// app.style.zIndex = "unset";
+		}
+
+		events.start.forEach(event => {
+			app_toolbar.addEventListener(event, e => handleStart(e))
+		})
+
+		events.move.forEach(event => {
+			window.addEventListener(event, e => handleMove(e))
+		})
+
+		events.end.forEach(event => {
+			window.addEventListener(event, e => handleEnd(e))
+		})
+	}
+}
+
 /**
  * Open an application
  * @param {Number|String} id 
  * @param {Function} callback 
  * @param {Object} config 
  */
+
+// var count = 0;
 
 class App {
 	constructor(id, callback, config) {
@@ -403,7 +702,7 @@ class App {
 			this.app_icon.remove();
 		}
 	}
-	loadStyles(content, type, callback = function () {}) {
+	loadStyles(content, type, callback = function () { }) {
 		if (type == "text") {
 			var s_e = document.createElement("style");
 			var style = "";
@@ -566,6 +865,9 @@ class App {
 			}
 
 			if (settings.movable == true) {
+				new APP_Mover(parent, mask, toolbar, action, full == false ? document.createElement("div") : full, this.status)
+
+				/*
 				dragger(title).On("dragstart", (e) => {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "block";
@@ -613,6 +915,13 @@ class App {
 					parent.style.height = settings.height + "px";
 					var x = e.pageX,
 						y = e.pageY;
+
+					if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+						var touch = e.touches[0] || e.changedTouches[0];
+						x = touch.pageX;
+						y = touch.pageY;
+					}
+
 					var element_x = parent.offsetLeft,
 						element_y = parent.offsetTop;
 					var re_x = element_x + (x - this.status.mouse_x);
@@ -640,12 +949,15 @@ class App {
 							if (e == "top") {
 								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: auto; left: 8px; right: 8px; top: 8px; ", this.status.app_position_side = e, this.status.side_data = `bottom: auto; left: 0; right: 0; top: 0; width: 100vw; height: calc((100% - 45px) / 2);`;
 							}
-							if (e == "bottom") {
-								return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", this.status.app_position_side = e, this.status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
-							}
+							//if (e == "bottom") {
+							//	return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", this.status.app_position_side = e, this.status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
+							//}
 						}
 
-					}, e);
+					}, {
+						pageX: x,
+						pageY: y
+					});
 				});
 
 				__drag__.On("dragend", () => {
@@ -665,7 +977,7 @@ class App {
 						$('[data-svg="unfull"]').classList.remove("hide");
 						$('[data-svg="full"]').classList.add("hide");
 					}
-					parent.style.zIndex = "none";
+					parent.style.zIndex = max_z_index;
 					$(".window-frame-application.focus", true).forEach(e => {
 						e.classList.remove("focus");
 					})
@@ -688,14 +1000,16 @@ class App {
 						$('[data-svg="unfull"]').classList.remove("hide");
 						$('[data-svg="full"]').classList.add("hide");
 					}
-					parent.style.zIndex = "none";
+					parent.style.zIndex = max_z_index;
 					$(".window-frame-application.focus", true).forEach(e => {
 						e.classList.remove("focus");
 					})
 					parent.classList.add("focus");
 				})
+				*/
 			}
 
+			/*
 			full !== false && full.addEventListener("click", () => {
 				if (this.status.in_full_mode == true) {
 					this.status.in_full_mode = false;
@@ -715,6 +1029,7 @@ class App {
 					parent.style.height = $(".window-frame").offsetHeight + "px";
 				}
 			})
+			*/
 
 			parent.addEventListener("mousedown", (e) => {
 				if (mini != false) {

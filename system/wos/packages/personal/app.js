@@ -17,7 +17,7 @@
         <div class="personal-title">Background</div>
         <div class="personal-background"></div>
     </div>
-    <div class="personal-group theme">
+    <!--div class="personal-group theme">
         <div class="personal-title">Theme</div>
         <div class="unique-select" data-select="personal-theme">
         <div class="unique-select-default">Choose...</div>
@@ -29,7 +29,7 @@
             </div>
     </div>
         </div>
-    </div>
+    </div-->
     </div>`);
     var delay = (delayInms) => { return new Promise(resolve => setTimeout(resolve, delayInms)); };
 
@@ -80,11 +80,12 @@
                 document.body.style.backgroundImage = `url(${image})`;
                 if (dark[i] == 1) {
                     document.documentElement.setAttribute("data-theme", "dark");
-                    frame.elements.content.querySelector('[data-select="personal-theme"]').classList.add("dark");
+                    // frame.elements.content.querySelector('[data-select="personal-theme"]').classList.add("dark");
                 } else {
                     document.documentElement.setAttribute("data-theme", "light");
-                    frame.elements.content.querySelector('[data-select="personal-theme"]').classList.remove("dark");
+                    // frame.elements.content.querySelector('[data-select="personal-theme"]').classList.remove("dark");
                 }
+                window.theme = dark[i] == 1 ? "dark" : "light";
                 frame.elements.content.querySelectorAll(`[data-theme].active`).forEach(btn => {
                     btn.classList.remove("active");
                 })
@@ -97,7 +98,7 @@
         });
     })
 
-    S.install();
+    // S.install();
 
     async function changeTheme(theme) {
         var index = bgs.includes(theme) ? bgs.indexOf(theme) : theme;
@@ -107,12 +108,13 @@
         var image = name.replace("$", bg);
         return load(image).then(async () => {
             document.body.style.backgroundImage = `url(${image})`;
+            window.theme = dark[index] == 1 ? "dark" : "light";
             if (dark[index] == 1) {
                 document.documentElement.setAttribute("data-theme", "dark");
-                frame.elements.content.querySelector('[data-select="personal-theme"]').classList.add("dark");
+                // frame.elements.content.querySelector('[data-select="personal-theme"]').classList.add("dark");
             } else {
                 document.documentElement.setAttribute("data-theme", "light");
-                frame.elements.content.querySelector('[data-select="personal-theme"]').classList.remove("dark");
+                // frame.elements.content.querySelector('[data-select="personal-theme"]').classList.remove("dark");
             }
         });
     }

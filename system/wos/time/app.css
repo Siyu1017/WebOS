@@ -9,5 +9,35 @@
 }
 
 .wos-time-clock {
-    white-space: nowrap;
+	white-space: nowrap;
+}
+
+.wos-time-window {
+	display: block !important;
+	width: fit-content;
+	box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 15px 5px;
+	bottom: 8px !important;
+	transition: all 0.15s ease-in-out 0s;
+	height: calc(100% - 16px) !important;
+	left: calc(-173px + 100vw);
+	border: 1px solid #c2c2c2;
+	width: 240px !important;
+	top: unset !important;
+}
+
+.wos-time-content {
+	padding: 10px;
+	box-sizing: border-box;
+	backdrop-filter: blur(16px) saturate(1.8);
+	background: rgb(241 241 241 / 90%);
+	height: 100%;
+}
+
+[data-theme="dark"] .wos-time-window {
+	border: 1px solid rgb(72, 72, 72);
+	color: #fff;
+}
+
+[data-theme="dark"] .wos-time-content {
+	background: rgb(42 42 42 / 98%);
 }
