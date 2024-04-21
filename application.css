@@ -32,7 +32,8 @@ body {
 	border-radius: 8px;
 	overflow: hidden;
 	box-shadow: rgba(99, 99, 99, 0.2) 1px 3px 3px 0px;
-	z-index: 9;
+	transform-origin: center bottom;
+    transform-origin: 0 0;
 }
 
 .window-frame-application-toolbar {

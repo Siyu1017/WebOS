@@ -17,6 +17,19 @@ var max_z_index = 9;
 
 var running_apps = {};
 
+var animation_setting = {
+	duration: 200,
+	minScale: 0.2,
+	timingFunction: "cubic-bezier(0.56, 0.05, 0.38, 0.91)"
+}
+
+var settings = {
+	barHeight: 45,
+	minOver: 30,
+	boundary: 16,
+	preview: 6
+}
+
 var dragger = (t, c) => {
 	c = c || {};
 	var target = t,
@@ -188,6 +201,17 @@ function isRGBColorSimilar(color1, color2, threshold) {
 	return diff <= threshold;
 }
 
+function offset(el) {
+	var rect = el.getBoundingClientRect(),
+		scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+		scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+	return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
+}
+
+function getPosition(element) {
+	return { x: offset(element).left, y: offset(element).top };
+}
+
 var App_data = {};
 
 class APP_Mover {
@@ -205,12 +229,6 @@ class APP_Mover {
 			x: 0,
 			y: 0
 		}
-		var settings = {
-			barHeight: 45,
-			minOver: 30,
-			boundary: 16,
-			preview: 6
-		}
 
 		var app_mask = mask;
 		var app_pos_preview = $(".reps");
@@ -221,8 +239,8 @@ class APP_Mover {
 		var app_data = {
 			width: 420,
 			height: 300,
-			left: 0,
-			top: 0,
+			x: 0,
+			y: 0,
 			boundary: null,
 			useBoundary: false,
 			fullMode: false,
@@ -253,6 +271,7 @@ class APP_Mover {
 				app_data = Module_Comparator(config, app_data);
 			}
 		}
+		console.log(app_data, config)
 		var last_pos = null;
 		var events = {
 			"start": ["mousedown", "touchstart", "pointerdown"],
@@ -260,21 +279,10 @@ class APP_Mover {
 			"end": ["mouseup", "touchend", "pointerup", "blur"]
 		}
 
-		function offset(el) {
-			var rect = el.getBoundingClientRect(),
-				scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-				scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-			return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
-		}
-
-		function getPosition(element) {
-			return { x: offset(element).left, y: offset(element).top };
-		}
-
 		function formatPos(pos, pre) {
 			var res = {
-				left: pre == true ? settings.preview : 0,
-				top: pre == true ? settings.preview : 0,
+				x: pre == true ? settings.preview : 0,
+				y: pre == true ? settings.preview : 0,
 				width: pre == true ? window.innerWidth - settings.preview * 2 : window.innerWidth,
 				height: pre == true ? (window.innerHeight - settings.barHeight) / 2 - settings.preview * 2 : (window.innerHeight - settings.barHeight) / 2
 			}
@@ -285,10 +293,10 @@ class APP_Mover {
 				res.width = pre == true ? window.innerWidth / 2 - settings.preview * 2 : window.innerWidth / 2;
 			}
 			if (pos.search("r") > -1) {
-				res.left = pre == true ? window.innerWidth / 2 + settings.preview : window.innerWidth / 2;
+				res.x = pre == true ? window.innerWidth / 2 + settings.preview : window.innerWidth / 2;
 			}
 			if (pos.search("b") > -1) {
-				res.top = pre == true ? (window.innerHeight - settings.barHeight) / 2 + settings.preview : (window.innerHeight - settings.barHeight) / 2;
+				res.y = pre == true ? (window.innerHeight - settings.barHeight) / 2 + settings.preview : (window.innerHeight - settings.barHeight) / 2;
 			}
 			return pos ? res : null;
 		}
@@ -297,9 +305,10 @@ class APP_Mover {
 			if (app_data.boundary == null && app_data.fullMode == false) {
 				app_data.useBoundary = false;
 			}
+			app.style.transition = `all ${animation_setting.duration}ms ${animation_setting.timingFunction}`;
 			if (app_data.fullMode == false) {
-				app.style.left = formatPos("f").left + "px";
-				app.style.top = formatPos("f").top + "px";
+				app.style.left = formatPos("f").x + "px";
+				app.style.top = formatPos("f").y + "px";
 				app.style.width = formatPos("f").width + "px";
 				app.style.height = formatPos("f").height + "px";
 				app.classList.add("window-frame-application-full-mode");
@@ -307,8 +316,8 @@ class APP_Mover {
 				// app.style.borderRadius = 0;
 				app_data.fullMode = true;
 			} else {
-				app.style.left = (app_data.useBoundary == true ? formatPos(app_data.boundary).left : app_data.left) + "px";
-				app.style.top = (app_data.useBoundary == true ? formatPos(app_data.boundary).top : app_data.top) + "px";
+				app.style.left = (app_data.useBoundary == true ? formatPos(app_data.boundary).x : app_data.x) + "px";
+				app.style.top = (app_data.useBoundary == true ? formatPos(app_data.boundary).y : app_data.y) + "px";
 				app.style.width = (app_data.useBoundary == true ? formatPos(app_data.boundary).width : app_data.width) + "px";
 				app.style.height = (app_data.useBoundary == true ? formatPos(app_data.boundary).height : app_data.height) + "px";
 				app.classList.remove("window-frame-application-full-mode");
@@ -316,6 +325,9 @@ class APP_Mover {
 				app.style.borderRadius = app_data.useBoundary == true ? 0 : "revert-layer";
 				app_data.fullMode = false;
 			}
+			setTimeout(() => {
+				app.style.transition = "";
+			}, animation_setting.duration)
 		})
 
 		function handleStart(e) {
@@ -403,8 +415,8 @@ class APP_Mover {
 				}
 				if (last_pos != formatPos(temp_pos)) {
 					last_pos = formatPos(temp_pos);
-					app_pos_preview.style.left = formatPos(temp_pos, true).left + "px";
-					app_pos_preview.style.top = formatPos(temp_pos, true).top + "px";
+					app_pos_preview.style.left = formatPos(temp_pos, true).x + "px";
+					app_pos_preview.style.top = formatPos(temp_pos, true).y + "px";
 					app_pos_preview.style.width = formatPos(temp_pos, true).width + "px";
 					app_pos_preview.style.height = formatPos(temp_pos, true).height + "px";
 				}
@@ -424,12 +436,13 @@ class APP_Mover {
 
 		function handleEnd() {
 			if (app_data.dragging == false) return;
-			app_data.left = getPosition(app).x;
-			app_data.top = getPosition(app).y;
+			app_data.x = getPosition(app).x;
+			app_data.y = getPosition(app).y;
 			if (app_data.boundary != null) {
+				app.style.transition = `all ${animation_setting.duration}ms ${animation_setting.timingFunction}`;
 				app_data.useBoundary = true
-				app.style.left = formatPos(app_data.boundary).left + "px";
-				app.style.top = formatPos(app_data.boundary).top + "px";
+				app.style.left = formatPos(app_data.boundary).x + "px";
+				app.style.top = formatPos(app_data.boundary).y + "px";
 				app.style.width = formatPos(app_data.boundary).width + "px";
 				app.style.height = formatPos(app_data.boundary).height + "px";
 				app_data.fullMode = false;
@@ -444,13 +457,16 @@ class APP_Mover {
 				}
 				app.style.borderRadius = 0;
 				app.style.boxShadow = "none";
+				setTimeout(() => {
+					app.style.transition = "";
+				}, animation_setting.duration)
 			} else {
 				app_data.useBoundary = false;
 				app.style.boxShadow = "revert-layer";
 			}
 			if (app_data.boundary != "f") {
-				app_data.left = getPosition(app).x;
-				app_data.top = getPosition(app).y;
+				app_data.x = getPosition(app).x;
+				app_data.y = getPosition(app).y;
 			}
 			$(".window-frame-application-content-mask", true).forEach(e => {
 				e.style.display = "none";
@@ -730,6 +746,8 @@ class App {
 			}
 		}
 	}
+	minimizeWindow = null;
+	unminimizeWindow = null;
 	execute(con, callback, config) {
 		/**
 		 * @var {string|HTMLElement} con
@@ -768,15 +786,15 @@ class App {
 			}
 		}
 		var parent = document.createElement("div");
-		var settings = this.settings;
+		var appSettings = this.settings;
 		parent.className = "window-frame-application";
 		parent.setAttribute("app-hash-content", this.hash);
-		settings.fullscreen == true && parent.classList.add("window-frame-application-full-mode");
-		settings.show == true && parent.classList.add("window-frame-application-show");
-		parent.style.top = settings.y + "px";
-		parent.style.left = settings.x + "px";
-		parent.style.width = (settings.width + settings.x < window.innerWidth ? settings.width : window.innerWidth - settings.x) + "px";
-		parent.style.height = (settings.height + settings.y < window.innerHeight - 45 ? settings.height : window.innerHeight - settings.y - 45) + "px";
+		appSettings.fullscreen == true && parent.classList.add("window-frame-application-full-mode");
+		appSettings.show == true && parent.classList.add("window-frame-application-show");
+		parent.style.top = appSettings.y + "px";
+		parent.style.left = appSettings.x + "px";
+		parent.style.width = (appSettings.width + appSettings.x < window.innerWidth ? appSettings.width : window.innerWidth - appSettings.x) + "px";
+		parent.style.height = (appSettings.height + appSettings.y < window.innerHeight - 45 ? appSettings.height : window.innerHeight - appSettings.y - 45) + "px";
 		$(".window-frame").appendChild(parent);
 
 		var toolbar = document.createElement("div");
@@ -793,7 +811,7 @@ class App {
 			content.innerHTML = typeof con == "string" ? con : config ? config.remove == true ? (con.innerHTML, con.remove()) : con.innerHTML : con.innerHTML;
 		}
 
-		if (settings.toolbar == true) {
+		if (appSettings.toolbar == true) {
 			parent.appendChild(toolbar);
 		}
 		parent.appendChild(content);
@@ -803,21 +821,21 @@ class App {
 			drag: false,
 			app_position_side: null,
 			side_data: null,
-			last_x: settings.x,
-			last_y: settings.y,
+			last_x: appSettings.x,
+			last_y: appSettings.y,
 			mouse_x: 0,
 			mouse_y: 0,
-			last_width: settings.width,
-			last_height: settings.height,
+			last_width: appSettings.width,
+			last_height: appSettings.height,
 			in_full_mode: false,
 			frame_exsit: true,
-			show: settings.show
+			show: appSettings.show
 		}
 
-		var app_icon = settings.showinbar == true ? child("div", $(".window-tool-bar-applications"), { class: settings.show == true ? "window-tool-bar-application running active" : "window-tool-bar-application running" }, `<div class="window-tool-bar-application-icon"><img class="window-tool-bar-application-icon-image" src="${settings.icon ? settings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
+		var app_icon = appSettings.showinbar == true ? child("div", $(".window-tool-bar-applications"), { class: appSettings.show == true ? "window-tool-bar-application running active" : "window-tool-bar-application running" }, `<div class="window-tool-bar-application-icon"><img class="window-tool-bar-application-icon-image" src="${appSettings.icon ? appSettings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
 
-		var loading = child("div", parent, { class: settings.showloading == true ? "window-frame-application-loading active" : "window-frame-application-loading", style: `background: ${settings.backgroundColor}` }, `<svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
-		<circle cx="8px" cy="8px" r="7px" style="stroke: ${settings.loadingColor}"></circle>
+		var loading = child("div", parent, { class: appSettings.showloading == true ? "window-frame-application-loading active" : "window-frame-application-loading", style: `background: ${appSettings.backgroundColor}` }, `<svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
+		<circle cx="8px" cy="8px" r="7px" style="stroke: ${appSettings.loadingColor}"></circle>
 	</svg>`);
 
 		this.showLoading = () => {
@@ -828,25 +846,25 @@ class App {
 			loading.classList.remove("active");
 		}
 
-		if (settings.toolbar == true) {
+		if (appSettings.toolbar == true) {
 			var title = child("div", toolbar, { class: "window-frame-application-toolbar-title" });
 			var drag = child("div", toolbar, { class: "window-frame-application-toolbar-drag" });
 			var action = child("div", toolbar, { class: "window-frame-application-toolbar-actions" });
 
-			var icon = child("img", title, { class: "window-frame-application-toolbar-title-icon", src: settings.icon ? settings.icon : "./application.png" });
-			var title_text = child("span", title, { class: "window-frame-application-toolbar-title-content" }, settings.title ? settings.title : "Application");
+			var icon = child("img", title, { class: "window-frame-application-toolbar-title-icon", src: appSettings.icon ? appSettings.icon : "./application.png" });
+			var title_text = child("span", title, { class: "window-frame-application-toolbar-title-content" }, appSettings.title ? appSettings.title : "Application");
 
-			var mini = settings.minimizable == true ? child("div", action, { class: "window-frame-application-toolbar-action-small window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6"></path></svg>`) : false;
+			var mini = appSettings.minimizable == true ? child("div", action, { class: "window-frame-application-toolbar-action-small window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6"></path></svg>`) : false;
 
-			var full = settings.fullscreenable == true ? child("div", action, { class: "window-frame-application-toolbar-action-toggle window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" data-svg="unfull"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"></path></svg><svg fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" data-svg="full"><rect x="5" y="6" width="14" height="12"></rect></svg>`) : false;
+			var full = appSettings.fullscreenable == true ? child("div", action, { class: "window-frame-application-toolbar-action-toggle window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" data-svg="unfull"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"></path></svg><svg fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" data-svg="full"><rect x="5" y="6" width="14" height="12"></rect></svg>`) : false;
 
-			var close = settings.closable == true ? child("div", action, { class: "window-frame-application-toolbar-action-close window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>`) : false;
+			var close = appSettings.closable == true ? child("div", action, { class: "window-frame-application-toolbar-action-close window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>`) : false;
 
 			$(".window-tool-bar-application", true).forEach(e => {
 				e.classList.remove("active");
 			})
 
-			var __drag__ = settings.movable == true ? dragger(drag) : {
+			var __drag__ = appSettings.movable == true ? dragger(drag) : {
 				On: function () { },
 				InArea: function () { }
 			};
@@ -864,8 +882,8 @@ class App {
 				})
 			}
 
-			if (settings.movable == true) {
-				new APP_Mover(parent, mask, toolbar, action, full == false ? document.createElement("div") : full, this.status)
+			if (appSettings.movable == true) {
+				new APP_Mover(parent, mask, toolbar, action, full == false ? document.createElement("div") : full, appSettings)
 
 				/*
 				dragger(title).On("dragstart", (e) => {
@@ -883,7 +901,7 @@ class App {
 					parent.style.zIndex = max_z_index;
 					parent.classList.add("focus");
 				});
-
+	
 				__drag__.On("dragstart", (e) => {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "block";
@@ -899,29 +917,29 @@ class App {
 					parent.style.zIndex = max_z_index;
 					parent.classList.add("focus");
 				});
-
+	
 				__drag__.On("dragging", (e) => {
 					if (this.status.drag == false) return;
-
+	
 					this.status.app_position_side = null;
-
-					if (settings.fullscreenable == true) {
+	
+					if (appSettings.fullscreenable == true) {
 						$('[data-svg="unfull"]').classList.add("hide");
 						$('[data-svg="full"]').classList.remove("hide");
 						$('.window-frame-application-toolbar-action-toggle').classList.remove("window-frame-application-toolbar-action-toggle-full-mode")
 					}
 					parent.classList.remove("window-frame-application-full-mode");
-					parent.style.width = settings.width + "px";
-					parent.style.height = settings.height + "px";
+					parent.style.width = appSettings.width + "px";
+					parent.style.height = appSettings.height + "px";
 					var x = e.pageX,
 						y = e.pageY;
-
+	
 					if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
 						var touch = e.touches[0] || e.changedTouches[0];
 						x = touch.pageX;
 						y = touch.pageY;
 					}
-
+	
 					var element_x = parent.offsetLeft,
 						element_y = parent.offsetTop;
 					var re_x = element_x + (x - this.status.mouse_x);
@@ -932,7 +950,7 @@ class App {
 					this.status.mouse_y = y;
 					this.status.last_x = parent.offsetLeft;
 					this.status.last_y = parent.offsetTop;
-
+	
 					__drag__.InArea($(".window-frame"), parent, (e) => {
 						if (e == false) {
 							$(".reps").style = "";
@@ -953,13 +971,13 @@ class App {
 							//	return $(".reps").style = "width: calc(100vw - 16px); height: calc((100vh - 45px) / 2 - 12px);bottom: 53px; left: 8px; right: 8px; top: auto; ", this.status.app_position_side = e, this.status.side_data = `bottom: 45px; left: 0; right: 0; top: auto; width: 100vw; height: calc((100% - 45px) / 2);`;
 							//}
 						}
-
+	
 					}, {
 						pageX: x,
 						pageY: y
 					});
 				});
-
+	
 				__drag__.On("dragend", () => {
 					if (this.status.drag == false) return;
 					if (this.status.app_position_side !== null) {
@@ -973,7 +991,7 @@ class App {
 					this.status.drag = false;
 					this.status.app_position_side = null;
 					$(".reps").classList.remove("active");
-					if (this.status.in_full_mode == true && this.status.frame_exsit == true && settings.fullscreenable == true) {
+					if (this.status.in_full_mode == true && this.status.frame_exsit == true && appSettings.fullscreenable == true) {
 						$('[data-svg="unfull"]').classList.remove("hide");
 						$('[data-svg="full"]').classList.add("hide");
 					}
@@ -987,7 +1005,7 @@ class App {
 						this.status.last_height = parent.scrollHeight;
 					}
 				})
-
+	
 				__drag__.On("dragout", () => {
 					$(".window-frame-application-content-mask", true).forEach(e => {
 						e.style.display = "none";
@@ -996,7 +1014,7 @@ class App {
 					this.status.app_position_side = null;
 					$(".reps").style = "";
 					$(".reps").classList.remove("active");
-					if (this.status.in_full_mode == true && this.status.frame_exsit == true && settings.fullscreenable == true) {
+					if (this.status.in_full_mode == true && this.status.frame_exsit == true && appSettings.fullscreenable == true) {
 						$('[data-svg="unfull"]').classList.remove("hide");
 						$('[data-svg="full"]').classList.add("hide");
 					}
@@ -1031,6 +1049,24 @@ class App {
 			})
 			*/
 
+			function minimizeWindow() {
+				parent.style.transition = `transform ${animation_setting.duration}ms ${animation_setting.timingFunction}, opacity ${animation_setting.duration / 2}ms ${animation_setting.timingFunction}`;
+				parent.style.transform = `translate3d(${(getPosition(app_icon).x - app_icon.offsetWidth / 2) - (getPosition(parent).x)}px, ${window.innerHeight - settings.barHeight - parent.offsetHeight * animation_setting.minScale - getPosition(parent).y}px, 0px) scale(${animation_setting.minScale})`;
+				setTimeout(() => {
+					parent.style.opacity = 0;
+					parent.style.zIndex = 0;
+				}, animation_setting.duration * .75);
+			}
+
+			function unminimizeWindow() {
+				parent.style.transition = `transform ${animation_setting.duration}ms ${animation_setting.timingFunction}, opacity ${animation_setting.duration / 2}ms ${animation_setting.timingFunction}`;
+				parent.style.opacity = 1;
+				parent.style.transform = `translate3d(0px, 0px, 0px) scale(1)`;
+			}
+
+			this.minimizeWindow = minimizeWindow;
+			this.unminimizeWindow = unminimizeWindow;
+
 			parent.addEventListener("mousedown", (e) => {
 				if (mini != false) {
 					if (e.target == mini || mini.contains(e.target)) return;
@@ -1054,22 +1090,27 @@ class App {
 					app_icon.classList.add("active");
 					max_z_index++;
 					parent.style.zIndex = max_z_index;
-					parent.classList.add("window-frame-application-show");
+					// 
+					unminimizeWindow();
+					// parent.classList.add("window-frame-application-show");
 				} else {
 					if (this.status.show == true) {
 						this.status.show = false;
 						app_icon.classList.remove("active");
-						parent.classList.remove("window-frame-application-show");
+						// 
+						minimizeWindow();
+						// parent.classList.remove("window-frame-application-show");
 					} else {
 						$(".window-tool-bar-application", true).forEach(e => {
 							e.classList.remove("active");
 						})
 						this.status.show = true;
 						app_icon.classList.add("active");
-						parent.classList.add("window-frame-application-show");
 						max_z_index++;
 						parent.style.zIndex = max_z_index;
-						parent.classList.add("window-frame-application-show");
+						//
+						unminimizeWindow();
+						// parent.classList.add("window-frame-application-show");
 					}
 				}
 
@@ -1077,7 +1118,9 @@ class App {
 			})
 
 			mini !== false && mini.addEventListener("click", () => {
-				parent.classList.remove("window-frame-application-show");
+				//
+				minimizeWindow();
+				// parent.classList.remove("window-frame-application-show");
 				this.status.show = false;
 				app_icon.classList.remove("active");
 			})
@@ -1091,8 +1134,12 @@ class App {
 		}
 
 		this.hide = () => {
-			parent.classList.remove("window-frame-application-show");
 			this.status.show = false;
+			if (this.minimizeWindow != null) {
+				this.minimizeWindow();
+			} else {
+				parent.classList.remove("window-frame-application-show");
+			}
 			app_icon.classList.remove("active");
 		}
 
