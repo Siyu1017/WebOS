@@ -389,6 +389,35 @@
                     }
                     return window.webos[command[0]][command[1]](content.replace(content.split(" ")[0], "").trim());
                 }
+            },
+            kill: (content, id) => {
+                var api = generateResponse(id);
+                if (content.trim().length == 0) {
+                    var table = api.createCustomTable();
+                    var name_col = table.createCol();
+                    var hash_col = table.createCol();
+
+                    name_col.createRow("Name");
+                    hash_col.createRow("Hash");
+
+                    Object.values(running_apps).forEach(app => {
+                        name_col.createRow(app.name ? app.name : " ");
+                        hash_col.createRow(app.hash ? app.hash : " ");
+                    })
+
+                    return;
+                }
+                if (content.trim() == "all") {
+                    Object.values(running_apps).forEach(app => {
+                        app.close();
+                        api.createLine(`App [ ${app.name} ] has been killed.`, "green");
+                    })
+                }
+                if (!running_apps[content.trim()]) {
+                    return api.createLine(`App [ ${content.trim()} ] doesn't exist.`, "red");
+                }
+                running_apps[content.trim()].close();
+                return api.createLine(`App [ ${content.trim()} ] has been killed.`, "green");
             }
         }
 

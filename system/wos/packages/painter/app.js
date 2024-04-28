@@ -2,7 +2,7 @@
     var w_app = new App("PAINTER" + Date.now(), null, {
         width: 420,
         height: 300,
-        title: " ",
+        title: "Painter",
         backgroundColor: "rgb(36, 36, 36)",
         icon: "data:image/svg+xml,%3Csvg class='svg-24' height='100' stroke='%23565656' preserveAspectRatio='xMidYMid meet' viewBox='0 0 100 100' width='100' x='0' xmlns='http://www.w3.org/2000/svg' y='0'%3E%3Cpath class='svg-stroke-primary' d='M61.5,25.9,74,38.5M66.8,20.6A8.9,8.9,0,0,1,79.3,33.2L30.5,82H18.1V69.3Z' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='6'%3E%3C/path%3E%3C/svg%3E",
         showloading: true,

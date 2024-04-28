@@ -6,6 +6,65 @@ function $(s, a) {
 	return a == true ? document.querySelectorAll(s) : document.querySelector(s);
 }
 
+function getJsonFromUrl(url) {
+	if (!url) url = location.search;
+	var query = url.substr(1);
+	var result = {};
+	query.split("&").forEach(function (part) {
+		var item = part.split("=");
+		result[item[0]] = decodeURIComponent(item[1]);
+	});
+	return result;
+}
+
+function formatString(str) {
+	// console.log(str)
+	try {
+		return str.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+	} catch (e) {
+		return str;
+	}
+}
+
+var hash = (n, c) => { var c = c || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', r = '', l = c.length; for (let i = 0; i < n; i++) { r += c.charAt(Math.floor(Math.random() * l)); } return r; };
+
+/*
+
+const registerServiceWorker = async () => {
+	if ("serviceWorker" in navigator) {
+		try {
+			navigator.serviceWorker.register("./sw.js").then(registration => {
+				registration.update();
+
+				if (['develop', 'dev', 'beta'].includes(getJsonFromUrl().mode) || ["true", true].includes(getJsonFromUrl().clearCache)) {
+					navigator.serviceWorker.controller.postMessage({
+						action: "update"
+					});
+				}
+
+				registration.addEventListener('updatefound', () => {
+					const newWorker = registration.installing;
+					if (registration.installing) {
+						console.log("Service worker installing");
+					} else if (registration.waiting) {
+						console.log("Service worker installed");
+					} else if (registration.active) {
+						console.log("Service worker active");
+					}
+				});
+			})
+		} catch (error) {
+			console.error(`Registration failed with ${error}`);
+		}
+	}
+};
+
+registerServiceWorker();
+
+*/
+
+var os = {};
+
 var hot_key = {
 
 }
@@ -28,6 +87,17 @@ var settings = {
 	minOver: 30,
 	boundary: 16,
 	preview: 6
+}
+
+var thumbnail_setting = {
+	maxWidth: 210,
+	maxHeight: 90,
+	padding: {
+		top: 6,
+		bottom: 6,
+		left: 6,
+		right: 6
+	}
 }
 
 var dragger = (t, c) => {
@@ -210,6 +280,14 @@ function offset(el) {
 
 function getPosition(element) {
 	return { x: offset(element).left, y: offset(element).top };
+}
+
+os.processes = Array(512)
+
+os.process = {
+	start: (name) => {
+
+	}
 }
 
 var App_data = {};
@@ -501,6 +579,118 @@ class APP_Mover {
 	}
 }
 
+var thumbnail_window = document.createElement("div");
+var thumbnail_bar = document.createElement("div");
+var thumbnail_icon = document.createElement("img");
+var thumbnail_title = document.createElement("div");
+var thumbnail_view = document.createElement("div");
+var thumbnail_close_button = document.createElement("div");
+var thumbnail_app = {};
+var thumbnail_queue = {};
+
+thumbnail_window.className = "thumbnail-window";
+thumbnail_view.className = "thumbnail-window-view";
+thumbnail_bar.className = "thumbnail-window-bar";
+thumbnail_icon.className = "thumbnail-window-icon";
+thumbnail_title.className = "thumbnail-window-title";
+thumbnail_close_button.className = "thumbnail-window-close-button";
+
+thumbnail_window.style.padding = `${thumbnail_setting.padding.top}px ${thumbnail_setting.padding.right}px ${thumbnail_setting.padding.bottom}px ${thumbnail_setting.padding.left}px`;
+thumbnail_icon.src = "./application.png";
+thumbnail_title.innerHTML = "Application";
+thumbnail_close_button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
+window.addEventListener("load", () => {
+	document.body.appendChild(thumbnail_window);
+	thumbnail_window.appendChild(thumbnail_bar);
+	thumbnail_window.appendChild(thumbnail_view);
+
+	thumbnail_bar.appendChild(thumbnail_icon);
+	thumbnail_bar.appendChild(thumbnail_title);
+	thumbnail_bar.appendChild(thumbnail_close_button);
+})
+
+function getThumbnailWindowRatio(parent, pt = false) {
+	return {
+		x: pt == true ? parent.offsetWidth / thumbnail_setting.maxWidth : thumbnail_setting.maxWidth / parent.offsetWidth,
+		y: pt == true ? parent.offsetHeight / thumbnail_setting.maxHeight : thumbnail_setting.maxHeight / parent.offsetHeight
+	}
+}
+
+function closeAppFromThumbnailWindow() {
+	thumbnail_app.close();
+	thumbnail_window.classList.remove('active');
+}
+
+thumbnail_close_button.addEventListener("click", closeAppFromThumbnailWindow);
+
+function hideThumbnailWindow() {
+	var id = hash(36);
+	thumbnail_queue[id] = false;
+	setTimeout(() => {
+		if (thumbnail_queue[id] == false) {
+			thumbnail_window.classList.remove("active");
+			thumbnail_app = null;
+		}
+		delete thumbnail_queue[id];
+	}, 200);
+}
+
+thumbnail_window.addEventListener("mouseover", () => {
+	Object.keys(thumbnail_queue).forEach((item, i) => {
+		thumbnail_queue[item] = true;
+	})
+})
+
+thumbnail_window.addEventListener("mouseleave", () => {
+	var id = hash(36);
+	thumbnail_queue[id] = false;
+	setTimeout(() => {
+		if (thumbnail_queue[id] == false) {
+			thumbnail_window.classList.remove("active");
+			Object.keys(thumbnail_queue).forEach((item, i) => {
+				thumbnail_queue[item] = false;
+			})
+			thumbnail_app = null;
+		}
+		delete thumbnail_queue[id];
+	}, 200);
+})
+
+function setThumbnailWindow(app) {
+	Object.keys(thumbnail_queue).forEach((item, i) => {
+		thumbnail_queue[item] = true;
+	})
+	thumbnail_window.classList.add("active");
+	if (thumbnail_app == app) return;
+	console.log(app)
+	thumbnail_app = app;
+	thumbnail_view.innerHTML = "";
+	thumbnail_view.style.maxWidth = thumbnail_setting.maxWidth + "px";
+	thumbnail_view.style.maxHeight = thumbnail_setting.maxHeight + "px";
+	var ratio = getThumbnailWindowRatio(app.elements.window, true);
+	var scale = getThumbnailWindowRatio(app.elements.window).x;
+	if (ratio.x < ratio.y) {
+		scale = getThumbnailWindowRatio(app.elements.window).y;
+	}
+	var cloneNode = app.elements.window.cloneNode(true);
+	cloneNode.style.position = "static";
+	cloneNode.style.transform = `scale(${scale})`;
+	cloneNode.style.opacity = "1";
+	thumbnail_view.appendChild(cloneNode);
+	var left = getPosition(app.app_icon).x + app.app_icon.offsetWidth / 2 - cloneNode.offsetWidth * scale / 2;
+	if (left < 12) {
+		left = 12;
+	}
+	thumbnail_window.style.left = left + "px";
+	thumbnail_view.style.width = cloneNode.offsetWidth * scale + "px";
+	thumbnail_view.style.height = cloneNode.offsetHeight * scale + "px";
+	thumbnail_window.style.maxWidth = cloneNode.offsetWidth * scale + thumbnail_setting.padding.left + thumbnail_setting.padding.right + "px";
+	thumbnail_window.style.padding = "6px";
+	thumbnail_title.innerHTML = app.settings.title.trim() == "" ? "Application" : formatString(app.settings.title || "Application");
+	thumbnail_icon.src = app.settings.icon || "./application.png";
+}
+
 /**
  * Open an application
  * @param {Number|String} id 
@@ -512,7 +702,6 @@ class APP_Mover {
 
 class App {
 	constructor(id, callback, config) {
-		var hash = (n, c) => { var c = c || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', r = '', l = c.length; for (let i = 0; i < n; i++) { r += c.charAt(Math.floor(Math.random() * l)); } return r; };
 		var options = {
 			width: {
 				value: 800,
@@ -699,8 +888,10 @@ class App {
 			backgroundColor: settings.backgroundColor,
 			color: color
 		}
+		this.id = id;
 		this.settings = settings;
-		this.hash = hash(24, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_")
+		this.name = this.settings["title"];
+		this.hash = hash(24, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_");
 		return this;
 	}
 	on(evt, fn) {
@@ -832,7 +1023,7 @@ class App {
 			show: appSettings.show
 		}
 
-		var app_icon = appSettings.showinbar == true ? child("div", $(".window-tool-bar-applications"), { class: appSettings.show == true ? "window-tool-bar-application running active" : "window-tool-bar-application running" }, `<div class="window-tool-bar-application-icon"><img class="window-tool-bar-application-icon-image" src="${appSettings.icon ? appSettings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
+		var app_icon = appSettings.showinbar == true ? child("div", $(".window-taskbar-applications"), { class: appSettings.show == true ? "window-taskbar-application running active" : "window-taskbar-application running" }, `<div class="window-taskbar-application-icon"><img class="window-taskbar-application-icon-image" src="${appSettings.icon ? appSettings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
 
 		var loading = child("div", parent, { class: appSettings.showloading == true ? "window-frame-application-loading active" : "window-frame-application-loading", style: `background: ${appSettings.backgroundColor}` }, `<svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
 		<circle cx="8px" cy="8px" r="7px" style="stroke: ${appSettings.loadingColor}"></circle>
@@ -852,7 +1043,7 @@ class App {
 			var action = child("div", toolbar, { class: "window-frame-application-toolbar-actions" });
 
 			var icon = child("img", title, { class: "window-frame-application-toolbar-title-icon", src: appSettings.icon ? appSettings.icon : "./application.png" });
-			var title_text = child("span", title, { class: "window-frame-application-toolbar-title-content" }, appSettings.title ? appSettings.title : "Application");
+			var title_text = child("span", title, { class: "window-frame-application-toolbar-title-content" }, appSettings.title ? formatString(appSettings.title) : "Application");
 
 			var mini = appSettings.minimizable == true ? child("div", action, { class: "window-frame-application-toolbar-action-small window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6"></path></svg>`) : false;
 
@@ -860,7 +1051,7 @@ class App {
 
 			var close = appSettings.closable == true ? child("div", action, { class: "window-frame-application-toolbar-action-close window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>`) : false;
 
-			$(".window-tool-bar-application", true).forEach(e => {
+			$(".window-taskbar-application", true).forEach(e => {
 				e.classList.remove("active");
 			})
 
@@ -877,7 +1068,7 @@ class App {
 			if (close != false) {
 				close.addEventListener("click", () => {
 					parent.remove();
-					// $(".window-tool-bar-application").remove();
+					// $(".window-taskbar-application").remove();
 					this.status.frame_exsit = false;
 				})
 			}
@@ -1071,7 +1262,7 @@ class App {
 				if (mini != false) {
 					if (e.target == mini || mini.contains(e.target)) return;
 				}
-				$(".window-tool-bar-application", true).forEach(e => {
+				$(".window-taskbar-application", true).forEach(e => {
 					e.classList.remove("active");
 				})
 				this.status.show = true;
@@ -1081,9 +1272,88 @@ class App {
 				parent.classList.add("window-frame-application-show");
 			})
 
-			app_icon.addEventListener("click", () => {
+			/*
+			var mouse_enter_time = Date.now();
+			var thumbnail = document.createElement("div");
+			var thumbnail_bar = document.createElement("div");
+			var thumbnail_icon = document.createElement("img");
+			var thumbnail_title = document.createElement("div");
+			var thumbnail_view = document.createElement("div");
+
+			thumbnail.className = "window-thumbnail";
+			thumbnail_view.className = "window-thumbnail-view";
+			thumbnail_bar.className = "window-thumbnail-bar";
+			thumbnail_icon.className = "window-thumbnail-icon";
+			thumbnail_title.className = "window-thumbnail-title";
+
+			thumbnail.style.padding = "6px";
+			thumbnail_icon.src = appSettings.icon || "./application.png";
+			thumbnail_title.innerHTML = formatString(appSettings.title) || "Application";
+
+			app_icon.appendChild(thumbnail);
+			thumbnail.appendChild(thumbnail_bar);
+			thumbnail.appendChild(thumbnail_view);
+
+			thumbnail_bar.appendChild(thumbnail_icon);
+			thumbnail_bar.appendChild(thumbnail_title);
+
+			var show_thumbnail = false;
+
+			function getThumbnailWindowRatio(pt = false) {
+				return {
+					x: pt == true ? parent.offsetWidth / thumbnail_setting.maxWidth : thumbnail_setting.maxWidth / parent.offsetWidth,
+					y: pt == true ? parent.offsetHeight / thumbnail_setting.maxHeight : thumbnail_setting.maxHeight / parent.offsetHeight
+				}
+			}
+
+			app_icon.addEventListener("mouseenter", () => {
+				mouse_enter_time = Date.now();
+			})
+
+			app_icon.addEventListener("mouseover", () => {
+				if (show_thumbnail == true) return;
+				if (Date.now() - mouse_enter_time > 100) {
+					thumbnail.classList.add("active");
+					show_thumbnail = true;
+					thumbnail_view.innerHTML = "";
+					thumbnail_view.style.maxWidth = thumbnail_setting.maxWidth + "px";
+					thumbnail_view.style.maxHeight = thumbnail_setting.maxHeight + "px";
+					var ratio = getThumbnailWindowRatio(true);
+					var scale = getThumbnailWindowRatio().x;
+					if (ratio.x < ratio.y) {
+						scale = getThumbnailWindowRatio().y;
+					}
+					var cloneNode = parent.cloneNode(true);
+					cloneNode.style.position = "static";
+					cloneNode.style.transform = `scale(${scale})`;
+					cloneNode.style.opacity = "1";
+					thumbnail_view.appendChild(cloneNode);
+					thumbnail_view.style.width = cloneNode.offsetWidth * scale + "px";
+					thumbnail_view.style.height = cloneNode.offsetHeight * scale + "px";
+					thumbnail.style.maxWidth = cloneNode.offsetWidth * scale + thumbnail_setting.padding * 2 + "px";
+					thumbnail.style.padding = "6px";
+					thumbnail_icon.src = appSettings.icon || "./application.png";
+					thumbnail_title.innerHTML = formatString(appSettings.title) || "Application";
+				}
+			})
+
+			app_icon.addEventListener("mouseleave", () => {
+				thumbnail.classList.remove("active");
+				show_thumbnail = false;
+			})
+			*/
+
+			app_icon.addEventListener("mouseover", (e) => {
+				setThumbnailWindow(this)
+			})
+
+			app_icon.addEventListener("mouseleave", (e) => {
+				hideThumbnailWindow()
+			})
+
+			app_icon.addEventListener("click", (e) => {
 				if (last_click_app != this.hash) {
-					$(".window-tool-bar-application", true).forEach(e => {
+					$(".window-taskbar-application", true).forEach(e => {
 						e.classList.remove("active");
 					})
 					this.status.show = true;
@@ -1101,7 +1371,7 @@ class App {
 						minimizeWindow();
 						// parent.classList.remove("window-frame-application-show");
 					} else {
-						$(".window-tool-bar-application", true).forEach(e => {
+						$(".window-taskbar-application", true).forEach(e => {
 							e.classList.remove("active");
 						})
 						this.status.show = true;
@@ -1183,8 +1453,9 @@ class App {
 		}
 
 		function changeIcon(url) {
+			appSettings.icon = url;
 			icon.src = url;
-			app_icon.innerHTML = `<div class="window-tool-bar-application-icon"><img class="window-tool-bar-application-icon-image" src="${url}" onerror="this.src='./application.png'"></div>`;
+			app_icon.querySelector(".window-taskbar-application-icon-image").src = url;
 			icon.onerror = () => {
 				icon.src = "./application.png"
 			}
@@ -1192,7 +1463,8 @@ class App {
 
 		function changeTitle(title) {
 			if (!title) return;
-			title_text.innerHTML = title;
+			appSettings.title = title;
+			title_text.innerHTML = formatString(title);
 		}
 
 		if (callback) {
@@ -1224,6 +1496,8 @@ class App {
 		}
 	}
 }
+
+os.App = App;
 
 /*
 window.addEventListener("mousemove", (e) => {

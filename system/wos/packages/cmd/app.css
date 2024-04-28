@@ -1,7 +1,7 @@
 .cmd {
     position: relative;
     height: 100%;
-    background: rgb(40,44,52);
+    background: rgb(40, 44, 52);
 }
 
 .terminal {
@@ -94,11 +94,11 @@
     max-width: fit-content;
 }
 
-.terminal-col + .terminal-col {
+.terminal-col+.terminal-col {
     border-left: 1px solid var(--terminal-border-color);
 }
 
-.terminal-row + .terminal-row {
+.terminal-row+.terminal-row {
     border-top: 1px solid var(--terminal-border-color);
 }
 
@@ -108,6 +108,10 @@
     overflow: hidden;
     max-width: 100%;
     text-overflow: ellipsis;
+    height: 18px;
+    display: flex;
+    box-sizing: content-box;
+    align-items: center;
 }
 
 .terminal *::selection {

@@ -64,18 +64,18 @@ img.theme-image {
 }
 
 [data-theme="dark"] {
-    .window-tool-bar-application.active,
-    .window-tool-bar-application:hover,
-    .window-tool-bar-system:hover,
-    .window-tool-bar-system.active {
+    .window-taskbar-application.active,
+    .window-taskbar-application:hover,
+    .window-taskbar-system:hover,
+    .window-taskbar-system.active {
         background: rgba(255, 255, 255, .1) !important;
     }
 
-    .window-tool-bar-system-time {
+    .window-taskbar-system-time {
         color: #fff;
     }
 
-    .window-tool-bar {
+    .window-taskbar {
         background: rgba(32, 32, 32, .75);
     }
 }

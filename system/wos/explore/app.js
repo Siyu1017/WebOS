@@ -1,17 +1,6 @@
 (async function () {
     const mode = ".";
 
-    function getJsonFromUrl(url) {
-        if (!url) url = location.search;
-        var query = url.substr(1);
-        var result = {};
-        query.split("&").forEach(function (part) {
-            var item = part.split("=");
-            result[item[0]] = decodeURIComponent(item[1]);
-        });
-        return result;
-    }
-
     var explore_datas = {
         executing_apps: [],
     }
@@ -71,17 +60,17 @@
         })
         explore.execute("Test");
 
-        $(".window-tool-bar").addEventListener('wheel', function (event) {
+        $(".window-taskbar").addEventListener('wheel', function (event) {
             var delta = event.deltaY || event.detail || event.wheelDelta;
             if (delta < 0) {
-                $(".window-tool-bar-applications").scrollTo({
+                $(".window-taskbar-applications").scrollTo({
                     behavior: "smooth",
-                    left: $(".window-tool-bar-applications").scrollLeft - 300
+                    left: $(".window-taskbar-applications").scrollLeft - 300
                 })
             } else {
-                $(".window-tool-bar-applications").scrollTo({
+                $(".window-taskbar-applications").scrollTo({
                     behavior: "smooth",
-                    left: $(".window-tool-bar-applications").scrollLeft + 300
+                    left: $(".window-taskbar-applications").scrollLeft + 300
                 })
             }
             event.preventDefault();

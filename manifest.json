@@ -1,0 +1,15 @@
+{
+    "name": "WebOS - A web version of the operating system that imitates Windows 11.",
+    "short_name": "WebOS",
+    "display": "standalone",
+    "start_url": "", 
+    "prefer_related_applications": true,
+    "background_color": "#000",
+    "icons": [
+        {
+            "src": "favicon.ico",
+            "sizes": "144x144",
+            "type": "image/ico"
+        }
+    ]
+}

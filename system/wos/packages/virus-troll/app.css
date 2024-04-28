@@ -1,9 +1,9 @@
-.window-tool-bar-application.active, .window-tool-bar-application:hover {
+.window-taskbar-application.active, .window-taskbar-application:hover {
     background: none !important;
 	backdrop-filter: invert(.5) !important;
 }
 
-.window-tool-bar-system:hover, .window-tool-bar-system.active {
+.window-taskbar-system:hover, .window-taskbar-system.active {
     background: none !important;
     backdrop-filter: invert(.5) !important;
 }

@@ -20,8 +20,8 @@
 
 	var pattern = [" AM", " PM"]
 
-	$(".window-tool-bar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
-	$(".window-tool-bar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
+	$(".window-taskbar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
+	$(".window-taskbar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
 
 	var last_time = now.format("yyyy/MM/dd hh:mm");
 	var last_whole_time = now.format("yyyy/MM/dd hh:mm:ss");
@@ -37,21 +37,21 @@
 			last_whole_time = now.format("yyyy/MM/dd hh:mm:ss");
 		}
 		if (last_time !== now.format("yyyy/MM/dd hh:mm")) {
-			$(".window-tool-bar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
-			$(".window-tool-bar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
+			$(".window-taskbar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
+			$(".window-taskbar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
 			last_time = now.format("yyyy/MM/dd hh:mm");
 		}
 	}, 1000);
 
-	$(".window-tool-bar-system").addEventListener("click", () => {
+	$(".window-taskbar-system").addEventListener("click", () => {
 		if (show == false) {
 			app.elements.window.style.zIndex = max_z_index + 1;
 			app.elements.window.style.left = `calc(100vw - ${app.elements.window.offsetWidth + 8}px)`;
-			$(".window-tool-bar-system").classList.add("active");
+			$(".window-taskbar-system").classList.add("active");
 			show = true;
 		} else {
 			app.elements.window.style.left = `calc(100vw + ${app.elements.window.offsetWidth}px)`;
-			$(".window-tool-bar-system").classList.remove("active");
+			$(".window-taskbar-system").classList.remove("active");
 			show = false;
 		}
 
@@ -67,10 +67,10 @@
 
 	document.addEventListener("mousedown", (e) => {
 		if (app.elements.window.contains(e.target)) return;
-		if ($(".window-tool-bar-system").contains(e.target) || e.target == $(".window-tool-bar-system")) return;
+		if ($(".window-taskbar-system").contains(e.target) || e.target == $(".window-taskbar-system")) return;
 		// app.elements.window.style.display = "none";
 		app.elements.window.style.left = `calc(100vw + ${app.elements.window.offsetWidth}px)`;
-		$(".window-tool-bar-system").classList.remove("active");
+		$(".window-taskbar-system").classList.remove("active");
 		show = false;
 	})
 })();

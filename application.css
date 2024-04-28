@@ -1,3 +1,7 @@
+:root {
+	--taskbar-height: 45px;
+}
+
 body {
 	width: 100vw;
 	height: 100vh;
@@ -19,7 +23,8 @@ body {
 	position: relative;
 	z-index: 9;
 	width: 100%;
-	height: calc(100% - 45px);
+	height: calc(100% - var(--taskbar-height));
+	margin-bottom: -.1px;
 }
 
 .window-frame-application.window-frame-application-show {
@@ -33,7 +38,7 @@ body {
 	overflow: hidden;
 	box-shadow: rgba(99, 99, 99, 0.2) 1px 3px 3px 0px;
 	transform-origin: center bottom;
-    transform-origin: 0 0;
+	transform-origin: 0 0;
 }
 
 .window-frame-application-toolbar {
@@ -126,8 +131,8 @@ svg {
 	display: none;
 }
 
-.window-tool-bar {
-	height: 45px;
+.window-taskbar {
+	height: var(--taskbar-height);
 	background: rgba(243, 243, 243, .85);
 	display: flex;
 	align-items: center;
@@ -142,35 +147,34 @@ svg {
 	transition: all .3s ease-in-out;
 }
 
-img.window-tool-bar-application-icon-image {
+.window-taskbar-application-icon-image {
 	width: 20px;
 	height: 20px;
 }
 
-.window-tool-bar-application.active .window-tool-bar-application-icon {
+.window-taskbar-application.active .window-taskbar-application-icon {
 	animation: scale .3s;
 }
 
-.window-tool-bar-application {
+.window-taskbar-application {
 	transition: all 0.15s ease-in-out;
 	width: 32px;
 	height: 32px;
-	cursor: pointer;
 	min-width: 32px;
 	border-radius: 4px;
 }
 
-.window-tool-bar-application:first-child {
+.window-taskbar-application:first-child {
 	margin-left: 12px;
 }
 
-.window-tool-bar-application.active,
-.window-tool-bar-application:hover {
+.window-taskbar-application.active,
+.window-taskbar-application:hover {
 	background: rgba(255, 255, 255, .67);
 	border-radius: 4px;
 }
 
-.window-tool-bar-application.running::after {
+.window-taskbar-application.running::after {
 	background: rgb(171, 171, 171);
 	border-radius: 1.5px;
 	height: 3px;
@@ -182,7 +186,7 @@ img.window-tool-bar-application-icon-image {
 	margin: 0 auto;
 }
 
-.window-tool-bar-application.running.active::after {
+.window-taskbar-application.running.active::after {
 	background: dodgerblue;
 	border-radius: 1.5px;
 	height: 3px;
@@ -194,7 +198,7 @@ img.window-tool-bar-application-icon-image {
 	margin: 0 31.25%;
 }
 
-.window-tool-bar-application-icon {
+.window-taskbar-application-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -278,7 +282,7 @@ img.window-tool-bar-application-icon-image {
 	z-index: 9;
 }
 
-.window-tool-bar-system {
+.window-taskbar-system {
 	height: 32px;
 	font-size: 10px;
 	text-align: center;
@@ -288,22 +292,22 @@ img.window-tool-bar-application-icon-image {
 	margin: 0 0 0 auto;
 }
 
-.window-tool-bar-system:not(.window-tool-bar-system:hover),
-.window-tool-bar-system.active {
+.window-taskbar-system:not(.window-taskbar-system:hover),
+.window-taskbar-system.active {
 	opacity: 1 !important;
 }
 
-.window-tool-bar-system:active {
+.window-taskbar-system:active {
 	opacity: .6;
 }
 
-.window-tool-bar-system-time-time,
-.window-tool-bar-system-time-date {
+.window-taskbar-system-time-time,
+.window-taskbar-system-time-date {
 	font-weight: 400;
 	line-height: 12px;
 }
 
-.window-tool-bar-system-time {
+.window-taskbar-system-time {
 	width: 100%;
 	height: 100%;
 	display: flex;
@@ -313,8 +317,8 @@ img.window-tool-bar-application-icon-image {
 	justify-content: center;
 }
 
-.window-tool-bar-system:hover,
-.window-tool-bar-system.active {
+.window-taskbar-system:hover,
+.window-taskbar-system.active {
 	background: rgba(255, 255, 255, .5);
 }
 
@@ -347,11 +351,11 @@ img.window-tool-bar-application-icon-image {
 	z-index: 10;
 }
 
-.window-tool-bar-application {
+.window-taskbar-application {
 	margin-left: 6px;
 }
 
-.window-tool-bar-applications {
+.window-taskbar-applications {
 	display: flex;
 	align-items: center;
 	overflow: auto;
@@ -360,7 +364,7 @@ img.window-tool-bar-application-icon-image {
 	margin-right: 6px;
 }
 
-.window-tool-bar-applications::-webkit-scrollbar {
+.window-taskbar-applications::-webkit-scrollbar {
 	width: 0;
 	height: 0;
 	border-radius: 0px;
@@ -368,23 +372,23 @@ img.window-tool-bar-application-icon-image {
 	border: 0;
 }
 
-.window-tool-bar-applications::-webkit-scrollbar-thumb {
+.window-taskbar-applications::-webkit-scrollbar-thumb {
 	min-height: 50px;
 	min-width: 50px;
 	border-radius: 10px;
 }
 
-.window-tool-bar-applications::-webkit-scrollbar-thumb:hover {
+.window-taskbar-applications::-webkit-scrollbar-thumb:hover {
 	min-height: 50px;
 	min-width: 50px;
 	border-radius: 10px;
 }
 
-.window-tool-bar-applications::-webkit-scrollbar-corner {
+.window-taskbar-applications::-webkit-scrollbar-corner {
 	background: none;
 }
 
-.window-tool-bar-return-desktop {
+.window-taskbar-return-desktop {
 	width: 8px;
 	height: 100%;
 	margin: 0 4px;
@@ -393,7 +397,7 @@ img.window-tool-bar-application-icon-image {
 	justify-content: center;
 }
 
-.window-tool-bar-return-desktop::before {
+.window-taskbar-return-desktop::before {
 	height: 16px;
 	width: 2px;
 	border-radius: 99px;
@@ -404,7 +408,7 @@ img.window-tool-bar-application-icon-image {
 	opacity: 0;
 }
 
-.window-tool-bar-return-desktop:hover::before {
+.window-taskbar-return-desktop:hover::before {
 	opacity: 1;
 }
 
@@ -613,4 +617,103 @@ input[type="checkbox"]:checked {
 .wui-system-dark :hover::-webkit-scrollbar-thumb,
 .wui-system-light :hover::-webkit-scrollbar-thumb {
 	display: block;
+}
+
+[data-theme="dark"] .thumbnail-window {
+	background: rgb(26 26 26 / 90%);
+}
+
+[data-theme="dark"] .thumbnail-window-title {
+	color: #fff;
+}
+
+.thumbnail-window {
+	/* width: fit-content; */
+	height: fit-content;
+	position: absolute;
+	bottom: calc(var(--taskbar-height) + 6px);
+	padding: 6px;
+	box-sizing: border-box;
+	backdrop-filter: blur(16px) saturate(1.8);
+	background: rgb(241 241 241 / 96%);
+	border-radius: 6px;
+	box-shadow: rgba(99, 99, 99, 0.2) 0px 4px 8px 4px;
+	/* max-height: 90px; */
+	/* min-height: 60px; */
+	opacity: 0;
+	z-index: -1;
+	transition: all .1s ease-in-out;
+	overflow: hidden;
+}
+
+.thumbnail-window-view {
+	max-width: 180px;
+	max-height: 120px;
+	pointer-events: none;
+}
+
+.thumbnail-window.active {
+	opacity: 1;
+	z-index: 9;
+}
+
+.thumbnail-window-icon {
+	width: 18px;
+	height: 18px;
+	min-width: 18px;
+	padding-left: 2px;
+}
+
+.thumbnail-window-bar {
+	display: flex;
+	align-items: center;
+	margin-bottom: 3px;
+	margin-top: 0px;
+	max-width: inherit;
+	overflow: hidden;
+	height: 24px;
+	width: calc(100% + 4px);
+	position: relative;
+	top: -2px;
+	left: -2px;
+}
+
+.thumbnail-window-title {
+	font-size: 10px;
+	padding-left: 6px;
+	padding-right: 6px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.thumbnail-window-close-button {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    margin-left: 6px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: all .16s ease-in-out;
+    display: none;
+    position: sticky;
+    right: 0;
+    margin: auto 0 auto auto;
+}
+
+.thumbnail-window-close-button:hover {
+    background: red !important;
+    color: white  !important;
+}
+
+.thumbnail-window:hover .thumbnail-window-close-button {
+    color: unset;
+    display: flex;
+}
+
+.thumbnail-window * {
+    -webkit-user-drag: none;
+    user-select: none;
 }
