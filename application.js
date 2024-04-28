@@ -624,6 +624,27 @@ function closeAppFromThumbnailWindow() {
 
 thumbnail_close_button.addEventListener("click", closeAppFromThumbnailWindow);
 
+thumbnail_window.addEventListener("click", (e) => {
+	if (e.target == thumbnail_close_button || thumbnail_close_button.contains(e.target)) return;
+	if (thumbnail_app != null) {
+		$(".window-taskbar-application", true).forEach(e => {
+			e.classList.remove("active");
+		})
+		if (thumbnail_app.status.show == false) {
+			thumbnail_app.unminimizeWindow();
+		}
+		thumbnail_app.status.show = true;
+		thumbnail_app.app_icon.classList.add("active");
+		max_z_index++;
+		thumbnail_app.parent.style.zIndex = max_z_index;
+	}
+	thumbnail_window.classList.remove("active");
+	Object.keys(thumbnail_queue).forEach((item, i) => {
+		thumbnail_queue[item] = false;
+	})
+	thumbnail_app = null;
+})
+
 function hideThumbnailWindow() {
 	var id = hash(36);
 	thumbnail_queue[id] = false;

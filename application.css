@@ -620,7 +620,7 @@ input[type="checkbox"]:checked {
 }
 
 [data-theme="dark"] .thumbnail-window {
-	background: rgb(26 26 26 / 90%);
+	background: rgb(50 50 50 / 90%);
 }
 
 [data-theme="dark"] .thumbnail-window-title {
@@ -639,7 +639,7 @@ input[type="checkbox"]:checked {
 	padding: 6px;
 	box-sizing: border-box;
 	backdrop-filter: blur(16px) saturate(1.8);
-	background: rgb(241 241 241 / 96%);
+	background: rgb(241 241 241 / 90%);
 	border-radius: 6px;
 	box-shadow: rgba(99, 99, 99, 0.2) 0px 4px 8px 4px;
 	/* max-height: 90px; */
