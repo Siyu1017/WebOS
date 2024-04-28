@@ -627,6 +627,10 @@ input[type="checkbox"]:checked {
 	color: #fff;
 }
 
+[data-theme="dark"] .thumbnail-window-close-button {
+	color: #fff !important;
+}
+
 .thumbnail-window {
 	/* width: fit-content; */
 	height: fit-content;
