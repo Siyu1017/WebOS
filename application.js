@@ -327,7 +327,7 @@ os.notification = {
 		notification_icon.src = icon;
 		notification_icon.onerror = () => {
 			if (notification_icon.getAttribute("src") == "./application.png") {
-				notification_info.replaceChild(notification_icon, notification_icon_failed);
+				notification_info.replaceChild(notification_icon_failed, notification_icon);
 			}
 			if (window.navigator.onLine == false) {
 				window.addEventListener("online", () => {

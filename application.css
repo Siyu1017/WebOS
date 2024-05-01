@@ -875,3 +875,12 @@ input[type="checkbox"]:checked {
     word-wrap: break-word;
     word-break: break-all;
 }
+
+.notification-icon-failed {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: rgb(171, 171, 171);
+}
