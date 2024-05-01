@@ -28,6 +28,8 @@ function formatString(str) {
 
 var hash = (n, c) => { var c = c || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', r = '', l = c.length; for (let i = 0; i < n; i++) { r += c.charAt(Math.floor(Math.random() * l)); } return r; };
 
+Date.prototype.format = function (fmt) { var o = { "M+": this.getMonth() + 1, "d+": this.getDate(), "h+": this.getHours(), "m+": this.getMinutes(), "s+": this.getSeconds(), "q+": Math.floor((this.getMonth() + 3) / 3), "S": this.getMilliseconds() }; if (/(y+)/.test(fmt)) { fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length)); } for (var k in o) { if (new RegExp("(" + k + ")").test(fmt)) { fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length))); } } return fmt; };
+
 /*
 
 const registerServiceWorker = async () => {
@@ -289,6 +291,152 @@ os.process = {
 
 	}
 }
+
+os.showSidebar = false;
+
+os.notification = {
+	notifications: {},
+	create: (icon, title, message, action) => {
+		$(".no-notification").classList.add("hide");
+
+		icon = icon || "./application.png";
+		title = title || "Notification";
+		message = message || "Notification";
+		action = action instanceof Function ? action : function () { };
+
+		var id = hash(120);
+
+		var notification = document.createElement("div");
+		var notification_info = document.createElement("div");
+		var notification_icon = document.createElement("img");
+		var notification_host = document.createElement("div");
+		var notification_time = document.createElement("div");
+		var notification_content = document.createElement("div");
+		var notification_icon_failed = document.createElement("div");
+
+		notification.className = "notification";
+		notification_info.className = "notification-info";
+		notification_icon.className = "notification-icon";
+		notification_host.className = "notification-host";
+		notification_time.className = "notification-time";
+		notification_content.className = "notification-content";
+		notification_icon_failed.className = "notification-icon-failed";
+
+		notification.setAttribute("notification-id", id);
+
+		notification_icon.src = icon;
+		notification_icon.onerror = () => {
+			if (notification_icon.getAttribute("src") == "./application.png") {
+				notification_info.replaceChild(notification_icon, notification_icon_failed);
+			}
+			if (window.navigator.onLine == false) {
+				window.addEventListener("online", () => {
+					notification_icon.src = "./application.png";
+				})
+			} else {
+				notification_icon.src = "./application.png";
+			}
+		}
+
+		notification_host.innerHTML = formatString(title);
+		notification_time.innerHTML = new Date().format("hh:mm");
+		notification_content.innerHTML = message;
+
+		notification.appendChild(notification_info);
+		notification.appendChild(notification_content);
+
+		notification_info.appendChild(notification_icon);
+		notification_info.appendChild(notification_host);
+		notification_info.appendChild(notification_time);
+
+		os.notification.notifications[id] = {
+			'notification': notification,
+			'icon': notification_icon,
+			'host': notification_host,
+			'time': notification_time,
+			'content': notification_content,
+			'action': action
+		};
+
+		notification.addEventListener("click", () => {
+			os.notification.notifications[id]['action']();
+			// $(".window-sidebar").classList.remove("active");
+			// os.showSidebar = false;
+			os.notification.delete(id);
+			if (Object.keys(os.notification.notifications).length == 0) {
+				$(".no-notification").classList.remove("hide");
+			} else {
+				$(".no-notification").classList.add("hide");
+			}
+		})
+
+		$(".window-sidebar-notifications").appendChild(notification);
+
+		return id;
+	},
+	edit: (id, type, content) => {
+		var types = ['icon', 'host', 'content', 'action'];
+		if (types.includes(type)) return;
+		if (!os.notification.notifications[id]) return;
+		if (type == 'icon') {
+			os.notification.notifications[id][type].src = content;
+		} else if (type == 'action') {
+			os.notification.notifications[id][type] = content instanceof Function ? content : function () { };
+		} else {
+			os.notification.notifications[id][type].innerHTML = content;
+		}
+	},
+	delete: (id) => {
+		if (!os.notification.notifications[id]) return;
+		os.notification.notifications[id]['notification'].remove();
+		delete os.notification.notifications[id];
+	}
+};
+
+window.addEventListener("load", () => {
+	var now = new Date(Date.now());
+	var pattern = [" AM", " PM"];
+
+	$(".window-taskbar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
+	$(".window-taskbar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
+
+	var last_time = now.format("yyyy/MM/dd hh:mm");
+	var last_whole_time = now.format("yyyy/MM/dd hh:mm:ss");
+
+	setInterval(function () {
+		var now = new Date(Date.now())
+		if (last_whole_time !== now.format("yyyy/MM/dd hh:mm:ss")) {
+			last_whole_time = now.format("yyyy/MM/dd hh:mm:ss");
+		}
+		if (last_time !== now.format("yyyy/MM/dd hh:mm")) {
+			$(".window-taskbar-system-time-time").innerHTML = (now.format("hh") < 13 ? now.format("hh:mm") : new Date(Date.now() - 12 * 1000 * 60 * 60).format("hh:mm")) + (now.format("hh") < 12 ? pattern[0] : pattern[1]);
+			$(".window-taskbar-system-time-date").innerHTML = now.format("yyyy/MM/dd");
+			last_time = now.format("yyyy/MM/dd hh:mm");
+		}
+	}, 1000);
+
+	$(".window-taskbar-system").addEventListener("click", () => {
+		if (os.showSidebar == false) {
+			$(".window-sidebar").classList.add("active");
+			os.showSidebar = true;
+		} else {
+			$(".window-sidebar").classList.remove("active");
+			os.showSidebar = false;
+		}
+	})
+
+	document.addEventListener("mousedown", (e) => {
+		if ($(".window-taskbar-system").contains(e.target) || e.target == $(".window-taskbar-system") || e.target == $(".window-sidebar") || $(".window-sidebar").contains(e.target)) return;
+		$(".window-sidebar").classList.remove("active");
+		os.showSidebar = false;
+	})
+
+	$(".window-sidebar-calendar-summary").innerHTML = new Date().toLocaleDateString(void 0, {
+		weekday: "long",
+		month: "long",
+		day: "numeric"
+	})
+})
 
 var App_data = {};
 

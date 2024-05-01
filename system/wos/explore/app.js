@@ -83,6 +83,10 @@
         }
 
         window.onerror = (message) => {
+            var notification = os.notification.create("./error.png", "Error", message);
+
+            console.log(notification);
+            
             new App("ERROR" + Date.now(), null, {
                 x: window.innerWidth / 2 - 120,
                 y: (window.innerHeight - 45) / 2 - 60,
@@ -185,6 +189,8 @@
         } else {
             document.querySelector(".window-alert-container").classList.add("hide");
         }
+
+        var notification = os.notification.create("./application.png", "Explore", "Initialization completed!");
 
         /*
         var checkOrientation = function () {

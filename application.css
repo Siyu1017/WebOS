@@ -692,32 +692,186 @@ input[type="checkbox"]:checked {
 }
 
 .thumbnail-window-close-button {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    margin-left: 6px;
-    border-radius: 4px;
-    align-items: center;
-    justify-content: center;
-    color: transparent;
-    transition: all .16s ease-in-out;
-    display: none;
-    position: sticky;
-    right: 0;
-    margin: auto 0 auto auto;
+	width: 24px;
+	height: 24px;
+	min-width: 24px;
+	margin-left: 6px;
+	border-radius: 4px;
+	align-items: center;
+	justify-content: center;
+	color: transparent;
+	transition: all .16s ease-in-out;
+	display: none;
+	position: sticky;
+	right: 0;
+	margin: auto 0 auto auto;
 }
 
 .thumbnail-window-close-button:hover {
-    background: red !important;
-    color: white  !important;
+	background: red !important;
+	color: white !important;
 }
 
 .thumbnail-window:hover .thumbnail-window-close-button {
-    color: unset;
-    display: flex;
+	color: unset;
+	display: flex;
 }
 
 .thumbnail-window * {
-    -webkit-user-drag: none;
-    user-select: none;
+	-webkit-user-drag: none;
+	user-select: none;
+}
+
+.window-sidebar {
+	position: fixed;
+	bottom: calc(var(--taskbar-height) + var(--sidebar-margin));
+	right: calc(var(--max-width) * -1.5);
+	max-width: var(--max-width);
+	transition: all .2s ease-in-out;
+	width: var(--max-width);
+	--max-width: 240px;
+	--sidebar-margin: 8px;
+	max-height: calc(100vh - var(--taskbar-height) - var(--sidebar-margin) * 2);
+	height: fit-content;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	gap: var(--sidebar-margin);
+	z-index: 500;
+	/* overflow: hidden; */
+	user-select: none;
+}
+
+.window-sidebar.active {
+	right: var(--sidebar-margin);
+}
+
+.window-sidebar-notification {
+	margin-top: auto;
+}
+
+[data-theme="dark"] .window-sidebar-notification,
+[data-theme="dark"] .window-sidebar-calendar {
+	background: rgb(42 42 42 / 90%);
+	border: 1px solid rgb(72, 72, 72);
+	color: #ddd;
+}
+
+.window-sidebar-notification,
+.window-sidebar-calendar {
+	box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px 4px;
+	transition: all 0.15s ease-in-out;
+	border: 1px solid #c2c2c2;
+	box-sizing: border-box;
+	backdrop-filter: blur(16px) saturate(1.8);
+	background: rgb(241 241 241 / 90%);
+	border-radius: 8px;
+	font-size: 14px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	height: auto;
+}
+
+.window-sidebar-notification-title {
+	/* margin-bottom: 6px; */
+	padding: 12px 16px 8px;
+}
+
+.notification {
+	display: flex;
+	flex-direction: column;
+	padding: 6px 12px 8px;
+	border-radius: 4px;
+	user-select: none;
+	-webkit-user-drag: none;
+	cursor: default;
+	transition: all .1s ease-in-out;
+}
+
+.notification-info {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	font-size: 12px;
+	margin-bottom: 4px;
+}
+
+.notification-icon {
+	width: 18px;
+	height: 18px;
+	margin-right: 6px;
+}
+
+.notification-host {
+	color: rgb(70, 70, 70);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	padding: 0 4px 0 0;
+}
+
+.notification-time {
+    margin: 0 0 0 auto;
+    min-width: fit-content;
+}
+
+.notification:hover {
+	background: rgb(250 250 250 / 63%);
+}
+
+[data-theme="dark"] .notification-host {
+    color: rgb(204 204 204);
+}
+
+[data-theme="dark"] .notification:hover {
+	background: rgb(81 81 81 / 62%);
+}
+
+.window-sidebar-notifications {
+    padding: 4px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.window-sidebar-calendar-summary {
+    padding: 12px 16px 12px;
+}
+
+.window-sidebar-calendar {
+    min-height: fit-content;
+    height: fit-content;
+    flex: 1;
+    display: table;
+}
+
+.window-sidebar-notification {
+    flex: 0;
+}
+
+.no-notification {
+    display: flex;
+    padding: 16px 12px 30px;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-notification.hide {
+    display: none;
+}
+
+.notification-content {
+    -webkit-box-flex: 2;
+    overflow: hidden;
+    max-height: 4.4rem;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-all;
 }
