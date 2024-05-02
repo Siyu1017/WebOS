@@ -295,13 +295,14 @@ os.process = {
 os.showSidebar = false;
 
 os.notification = {
+	cloneNodes: {},
 	notifications: {},
 	create: (icon, title, message, action) => {
 		$(".no-notification").classList.add("hide");
 
 		icon = icon || "./application.png";
-		title = title || "Notification";
-		message = message || "Notification";
+		title = title.trim().length > 0 ? title : "Notification";
+		message = message.trim().length > 0 ? message : "Notification";
 		action = action instanceof Function ? action : function () { };
 
 		var id = hash(120);
@@ -359,7 +360,9 @@ os.notification = {
 		};
 
 		notification.addEventListener("click", () => {
-			os.notification.notifications[id]['action']();
+			try {
+				os.notification.notifications[id]['action']();
+			} catch (e) { };
 			// $(".window-sidebar").classList.remove("active");
 			// os.showSidebar = false;
 			os.notification.delete(id);
@@ -370,7 +373,70 @@ os.notification = {
 			}
 		})
 
-		$(".window-sidebar-notifications").appendChild(notification);
+		$(".window-sidebar-notifications").insertBefore(notification, $(".window-sidebar-notifications").firstChild);
+
+		setTimeout(() => {
+			notification.style.animation = "none";
+			notification.style.transform = "scale(1)";
+		}, 150)
+
+		if (os.showSidebar == true) {
+			if ($(".window-sidebar-notifications").scrollTop < $(".window-sidebar-notifications").offsetHeight * 0.5) {
+				$(".window-sidebar-notifications").scrollTo({ 'behavior': 'smooth', 'top': 0 });
+			}
+		} else {
+			var cid = hash(96);
+			var cloneNode = notification.cloneNode(true);
+			cloneNode.classList.add("popup");
+			document.body.appendChild(cloneNode);
+
+			os.notification.cloneNodes[cid] = cloneNode;
+
+			setTimeout(() => {
+				cloneNode.style.animation = "none";
+			}, 250)
+
+			cloneNode.querySelector(".notification-icon").onerror = () => {
+				var notification_icon = cloneNode.querySelector(".notification-icon");
+				var notification_info = cloneNode.querySelector(".notification-info");
+				if (notification_icon.getAttribute("src") == "./application.png") {
+					notification_info.replaceChild(notification_icon_failed, notification_icon);
+				}
+				if (window.navigator.onLine == false) {
+					window.addEventListener("online", () => {
+						notification_icon.src = "./application.png";
+					})
+				} else {
+					notification_icon.src = "./application.png";
+				}
+			}
+
+			cloneNode.addEventListener("click", () => {
+				os.notification.delete(id);
+
+				if (Object.keys(os.notification.notifications).length == 0) {
+					$(".no-notification").classList.remove("hide");
+				} else {
+					$(".no-notification").classList.add("hide");
+				}
+
+				cloneNode.style.animation = "revert-layer";
+				cloneNode.classList.add("hide");
+				setTimeout(() => {
+					cloneNode.remove();
+					delete os.notification.cloneNodes[cid];
+				}, 500)
+			})
+
+			setTimeout(() => {
+				cloneNode.style.animation = "revert-layer";
+				cloneNode.classList.add("hide");
+				setTimeout(() => {
+					cloneNode.remove();
+					delete os.notification.cloneNodes[cid];
+				}, 500)
+			}, 5000)
+		}
 
 		return id;
 	},
@@ -388,8 +454,13 @@ os.notification = {
 	},
 	delete: (id) => {
 		if (!os.notification.notifications[id]) return;
-		os.notification.notifications[id]['notification'].remove();
+		var notification = os.notification.notifications[id]['notification']
+		notification.style.animation = "revert-layer";
+		notification.classList.add("hide");
 		delete os.notification.notifications[id];
+		setTimeout(() => {
+			notification.remove();
+		}, 500)
 	}
 };
 
@@ -419,6 +490,15 @@ window.addEventListener("load", () => {
 		if (os.showSidebar == false) {
 			$(".window-sidebar").classList.add("active");
 			os.showSidebar = true;
+			Object.values(os.notification.cloneNodes).forEach((node, i) => {
+				node.style.animation = "revert-layer";
+				node.classList.add("hide");
+				setTimeout(() => {
+					node.remove();
+					delete os.notification.cloneNodes[Object.keys(os.notification.cloneNodes)[i]];
+				}, 500)
+			})
+			os.notification.cloneNodes = {};
 		} else {
 			$(".window-sidebar").classList.remove("active");
 			os.showSidebar = false;
