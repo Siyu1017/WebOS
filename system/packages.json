@@ -8,6 +8,14 @@
         "version": "1.2.0"
     },
     {
+        "name": "Notification Trigger",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/notify-trigger/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
         "name": "Web Browser",
         "author": "WebOS, Siyu1017",
         "scripts": [

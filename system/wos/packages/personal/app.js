@@ -57,7 +57,14 @@
         return new Promise((resolve, reject) => {
             const image = new Image();
             image.addEventListener('load', resolve);
-            image.addEventListener('error', reject);
+            image.addEventListener('error', () => {
+                try {
+                    var notification = os.notification.create("./system/wos/packages/personal/personal.png", "Personalisation", `Failed to load image '${src}'.`, () => {
+                        app.focusWindow();
+                    });
+                } catch (e) {};
+                reject();
+            });
             image.src = src;
         });
     }
@@ -76,7 +83,7 @@
             // System.showStartLoading();
             await delay(500);
             var image = name.replace("$", bg);
-            load(image).then(async () => {
+            load(image).finally(async () => {
                 document.body.style.backgroundImage = `url(${image})`;
                 if (dark[i] == 1) {
                     document.documentElement.setAttribute("data-theme", "dark");

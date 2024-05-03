@@ -137,6 +137,8 @@
         (async (status) => {
             await delay(500);
             System.hideStartLoading();
+            await delay(1000);
+            var notification = os.notification.create("./application.png", "Explore", "Initialization completed!");
         })();
 
         function openFullscreen() {
@@ -189,8 +191,6 @@
         } else {
             document.querySelector(".window-alert-container").classList.add("hide");
         }
-
-        var notification = os.notification.create("./application.png", "Explore", "Initialization completed!");
 
         /*
         var checkOrientation = function () {

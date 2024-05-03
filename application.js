@@ -284,6 +284,38 @@ function getPosition(element) {
 	return { x: offset(element).left, y: offset(element).top };
 }
 
+function handleImageError(image, failed, alternatives = "./application.png") {
+	if (image.getAttribute("src") == alternatives) {
+		return image.parentNode.replaceChild(failed, image);
+	}
+	if (window.navigator.onLine == false) {
+		image.parentNode.replaceChild(failed, image);
+		window.addEventListener("online", () => {
+			if (!failed.parentNode) return;
+			if (failed.parentNode.contains(failed)) {
+				failed.parentNode.replaceChild(image, failed);
+			}
+			image.src = alternatives;
+		})
+		return;
+	} else {
+		image.src = alternatives;
+	}
+}
+
+function getStackTrace() {
+	var stack;
+
+	try {
+		throw new Error('');
+	} catch (error) {
+		stack = error.stack || '';
+	}
+
+	stack = stack.split('\n').map(function (line) { return line.trim(); });
+	return stack.splice(stack[0] == 'Error' ? 2 : 1);
+}
+
 os.processes = Array(512)
 
 os.process = {
@@ -296,12 +328,23 @@ os.showSidebar = false;
 
 os.notification = {
 	cloneNodes: {},
+	cloneNodePositions: {},
+	lastCallTime: {},
 	notifications: {},
-	create: (icon, title, message, action) => {
+	timeInterval: 100,
+	create: async (icon, owner, message, action) => {
+		var trace = await getStackTrace();
+		if (os.notification.lastCallTime[trace.join("\n")]) {
+			if (Date.now() - os.notification.lastCallTime[trace.join("\n")] < os.notification.timeInterval) return;
+		}
+		os.notification.lastCallTime[trace.join("\n")] = Date.now();
+
+		console.log(trace)
+
 		$(".no-notification").classList.add("hide");
 
 		icon = icon || "./application.png";
-		title = title.trim().length > 0 ? title : "Notification";
+		owner = owner.trim().length > 0 ? owner : "Notification";
 		message = message.trim().length > 0 ? message : "Notification";
 		action = action instanceof Function ? action : function () { };
 
@@ -310,7 +353,7 @@ os.notification = {
 		var notification = document.createElement("div");
 		var notification_info = document.createElement("div");
 		var notification_icon = document.createElement("img");
-		var notification_host = document.createElement("div");
+		var notification_owner = document.createElement("div");
 		var notification_time = document.createElement("div");
 		var notification_content = document.createElement("div");
 		var notification_icon_failed = document.createElement("div");
@@ -318,7 +361,7 @@ os.notification = {
 		notification.className = "notification";
 		notification_info.className = "notification-info";
 		notification_icon.className = "notification-icon";
-		notification_host.className = "notification-host";
+		notification_owner.className = "notification-owner";
 		notification_time.className = "notification-time";
 		notification_content.className = "notification-content";
 		notification_icon_failed.className = "notification-icon-failed";
@@ -327,19 +370,29 @@ os.notification = {
 
 		notification_icon.src = icon;
 		notification_icon.onerror = () => {
+			handleImageError(notification_icon, notification_icon_failed, "./application.png");
+		}
+		/*
+		notification_icon.onerror = () => {
 			if (notification_icon.getAttribute("src") == "./application.png") {
-				notification_info.replaceChild(notification_icon_failed, notification_icon);
+				return notification_info.replaceChild(notification_icon_failed, notification_icon);
 			}
 			if (window.navigator.onLine == false) {
+				notification_info.replaceChild(notification_icon_failed, notification_icon);
 				window.addEventListener("online", () => {
+					if (notification_info.contains(notification_icon_failed)) {
+						notification_info.replaceChild(notification_icon, notification_icon_failed);
+					}
 					notification_icon.src = "./application.png";
 				})
+				return;
 			} else {
 				notification_icon.src = "./application.png";
 			}
 		}
+		*/
 
-		notification_host.innerHTML = formatString(title);
+		notification_owner.innerHTML = formatString(owner);
 		notification_time.innerHTML = new Date().format("hh:mm");
 		notification_content.innerHTML = message;
 
@@ -347,13 +400,13 @@ os.notification = {
 		notification.appendChild(notification_content);
 
 		notification_info.appendChild(notification_icon);
-		notification_info.appendChild(notification_host);
+		notification_info.appendChild(notification_owner);
 		notification_info.appendChild(notification_time);
 
 		os.notification.notifications[id] = {
 			'notification': notification,
 			'icon': notification_icon,
-			'host': notification_host,
+			'owner': notification_owner,
 			'time': notification_time,
 			'content': notification_content,
 			'action': action
@@ -388,14 +441,24 @@ os.notification = {
 			var cid = hash(96);
 			var cloneNode = notification.cloneNode(true);
 			cloneNode.classList.add("popup");
-			document.body.appendChild(cloneNode);
+			$(".window-popup-container").appendChild(cloneNode);
+			//document.body.appendChild(cloneNode);
 
 			os.notification.cloneNodes[cid] = cloneNode;
+			os.notification.cloneNodePositions[cid] = cloneNode;
 
 			setTimeout(() => {
 				cloneNode.style.animation = "none";
 			}, 250)
 
+			cloneNode.querySelector(".notification-icon").onerror = () => {
+				var notification_icon = cloneNode.querySelector(".notification-icon");
+				var notification_icon_failed = document.createElement("div");
+				notification_icon_failed.className = "notification-icon-failed";
+				handleImageError(notification_icon, notification_icon_failed, "./application.png");
+			}
+
+			/*
 			cloneNode.querySelector(".notification-icon").onerror = () => {
 				var notification_icon = cloneNode.querySelector(".notification-icon");
 				var notification_info = cloneNode.querySelector(".notification-info");
@@ -410,8 +473,13 @@ os.notification = {
 					notification_icon.src = "./application.png";
 				}
 			}
+			*/
 
 			cloneNode.addEventListener("click", () => {
+				try {
+					os.notification.notifications[id]['action']();
+				} catch (e) { };
+
 				os.notification.delete(id);
 
 				if (Object.keys(os.notification.notifications).length == 0) {
@@ -441,7 +509,7 @@ os.notification = {
 		return id;
 	},
 	edit: (id, type, content) => {
-		var types = ['icon', 'host', 'content', 'action'];
+		var types = ['icon', 'owner', 'content', 'action'];
 		if (types.includes(type)) return;
 		if (!os.notification.notifications[id]) return;
 		if (type == 'icon') {
@@ -1272,7 +1340,7 @@ class App {
 			show: appSettings.show
 		}
 
-		var app_icon = appSettings.showinbar == true ? child("div", $(".window-taskbar-applications"), { class: appSettings.show == true ? "window-taskbar-application running active" : "window-taskbar-application running" }, `<div class="window-taskbar-application-icon"><img class="window-taskbar-application-icon-image" src="${appSettings.icon ? appSettings.icon : "./application.png"}" onerror="this.src='./application.png'"></div>`) : document.createElement("undefined-element");
+		var app_icon = appSettings.showinbar == true ? child("div", $(".window-taskbar-applications"), { class: appSettings.show == true ? "window-taskbar-application running active" : "window-taskbar-application running" }, `<div class="window-taskbar-application-icon"><img class="window-taskbar-application-icon-image" src="${appSettings.icon ? appSettings.icon : "./application.png"}"></div>`) : document.createElement("undefined-element");
 
 		var loading = child("div", parent, { class: appSettings.showloading == true ? "window-frame-application-loading active" : "window-frame-application-loading", style: `background: ${appSettings.backgroundColor}` }, `<svg class="webos-loading-spinner" height="48" width="48" viewBox="0 0 16 16">
 		<circle cx="8px" cy="8px" r="7px" style="stroke: ${appSettings.loadingColor}"></circle>
@@ -1292,6 +1360,13 @@ class App {
 			var action = child("div", toolbar, { class: "window-frame-application-toolbar-actions" });
 
 			var icon = child("img", title, { class: "window-frame-application-toolbar-title-icon", src: appSettings.icon ? appSettings.icon : "./application.png" });
+
+			icon.onerror = () => {
+				var error = document.createElement("div");
+				error.className = "error-image";
+				handleImageError(icon, error, "./application.png");
+			}
+
 			var title_text = child("span", title, { class: "window-frame-application-toolbar-title-content" }, appSettings.title ? formatString(appSettings.title) : "Application");
 
 			var mini = appSettings.minimizable == true ? child("div", action, { class: "window-frame-application-toolbar-action-small window-frame-application-toolbar-action" }, `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6"></path></svg>`) : false;
@@ -1600,6 +1675,34 @@ class App {
 				hideThumbnailWindow()
 			})
 
+			this.focusWindow = () => {
+				if (last_click_app != this.hash) {
+					$(".window-taskbar-application", true).forEach(e => {
+						e.classList.remove("active");
+					})
+					this.status.show = true;
+					app_icon.classList.add("active");
+					max_z_index++;
+					parent.style.zIndex = max_z_index;
+					// 
+					unminimizeWindow();
+					// parent.classList.add("window-frame-application-show");
+				} else {
+					$(".window-taskbar-application", true).forEach(e => {
+						e.classList.remove("active");
+					})
+					this.status.show = true;
+					app_icon.classList.add("active");
+					max_z_index++;
+					parent.style.zIndex = max_z_index;
+					//
+					unminimizeWindow();
+					// parent.classList.add("window-frame-application-show");
+				}
+
+				last_click_app = this.hash;
+			}
+
 			app_icon.addEventListener("click", (e) => {
 				if (last_click_app != this.hash) {
 					$(".window-taskbar-application", true).forEach(e => {
@@ -1650,6 +1753,14 @@ class App {
 				delete running_apps[this.hash];
 				this.status.frame_exsit = false;
 			})
+		}
+
+		if (appSettings.showinbar == true) {
+			app_icon.querySelector(".window-taskbar-application-icon-image").onerror = () => {
+				var error = document.createElement("div");
+				error.className = "error-image";
+				handleImageError(app_icon.querySelector(".window-taskbar-application-icon-image"), error, "./application.png");
+			}
 		}
 
 		this.hide = () => {
@@ -1703,10 +1814,17 @@ class App {
 
 		function changeIcon(url) {
 			appSettings.icon = url;
-			icon.src = url;
 			app_icon.querySelector(".window-taskbar-application-icon-image").src = url;
+			app_icon.querySelector(".window-taskbar-application-icon-image").onerror = () => {
+				var error = document.createElement("div");
+				error.className = "error-image";
+				handleImageError(app_icon.querySelector(".window-taskbar-application-icon-image"), error, "./application.png");
+			}
+			icon.src = url;
 			icon.onerror = () => {
-				icon.src = "./application.png"
+				var error = document.createElement("div");
+				error.className = "error-image";
+				handleImageError(icon, error, "./application.png");
 			}
 		}
 
