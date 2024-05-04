@@ -332,6 +332,21 @@ os.notification = {
 	lastCallTime: {},
 	notifications: {},
 	timeInterval: 100,
+	closeCloneNode: (cloneNode, cid) => {
+		cloneNode.style.animation = "revert-layer";
+		cloneNode.classList.add("hide");
+		setTimeout(() => {
+			cloneNode.remove();
+			delete os.notification.cloneNodes[cid];
+		}, 500)
+	},
+	checkNotificationCount: () => {
+		if (Object.keys(os.notification.notifications).length == 0) {
+			$(".no-notification").classList.remove("hide");
+		} else {
+			$(".no-notification").classList.add("hide");
+		}
+	},
 	create: (icon, owner, message, action) => {
 		var trace = getStackTrace();
 		if (os.notification.lastCallTime[trace.join("\n")]) {
@@ -419,11 +434,7 @@ os.notification = {
 			// $(".window-sidebar").classList.remove("active");
 			// os.showSidebar = false;
 			os.notification.delete(id);
-			if (Object.keys(os.notification.notifications).length == 0) {
-				$(".no-notification").classList.remove("hide");
-			} else {
-				$(".no-notification").classList.add("hide");
-			}
+			os.notification.checkNotificationCount();
 		})
 
 		$(".window-sidebar-notifications").insertBefore(notification, $(".window-sidebar-notifications").firstChild);
@@ -446,6 +457,8 @@ os.notification = {
 
 			os.notification.cloneNodes[cid] = cloneNode;
 			os.notification.cloneNodePositions[cid] = cloneNode;
+
+			os.notification.notifications[id]['cid'] = cid;
 
 			setTimeout(() => {
 				cloneNode.style.animation = "none";
@@ -481,28 +494,12 @@ os.notification = {
 				} catch (e) { };
 
 				os.notification.delete(id);
-
-				if (Object.keys(os.notification.notifications).length == 0) {
-					$(".no-notification").classList.remove("hide");
-				} else {
-					$(".no-notification").classList.add("hide");
-				}
-
-				cloneNode.style.animation = "revert-layer";
-				cloneNode.classList.add("hide");
-				setTimeout(() => {
-					cloneNode.remove();
-					delete os.notification.cloneNodes[cid];
-				}, 500)
+				os.notification.checkNotificationCount();
+				os.notification.closeCloneNode(cloneNode, cid);
 			})
 
 			setTimeout(() => {
-				cloneNode.style.animation = "revert-layer";
-				cloneNode.classList.add("hide");
-				setTimeout(() => {
-					cloneNode.remove();
-					delete os.notification.cloneNodes[cid];
-				}, 500)
+				os.notification.closeCloneNode(cloneNode, cid);
 			}, 5000)
 		}
 
@@ -510,8 +507,10 @@ os.notification = {
 	},
 	edit: (id, type, content) => {
 		var types = ['icon', 'owner', 'content', 'action'];
-		if (types.includes(type)) return;
+		if (!types.includes(type)) return;
 		if (!os.notification.notifications[id]) return;
+		var cid = os.notification.notifications[id]['cid'] || null;
+		var cloneNode = os.notification.cloneNodes[cid] ? os.notification.cloneNodes[cid] : null;
 		if (type == 'icon') {
 			os.notification.notifications[id][type].src = content;
 		} else if (type == 'action') {
@@ -519,10 +518,24 @@ os.notification = {
 		} else {
 			os.notification.notifications[id][type].innerHTML = content;
 		}
+		if (cloneNode != null) {
+			if (type == 'icon') {
+				cloneNode.querySelector(".notification-icon").src = content;
+			} else if (type == 'owner') {
+				cloneNode.querySelector(".notification-owner").innerHTML = content;
+			} else if (type == 'content') {
+				cloneNode.querySelector(".notification-content").innerHTML = content;
+			}
+		}
 	},
 	delete: (id) => {
 		if (!os.notification.notifications[id]) return;
-		var notification = os.notification.notifications[id]['notification']
+		var cid = os.notification.notifications[id]['cid'] || null;
+		var cloneNode = os.notification.cloneNodes[cid] ? os.notification.cloneNodes[cid] : null;
+		if (cloneNode != null) {
+			os.notification.closeCloneNode(cloneNode, cid);
+		}
+		var notification = os.notification.notifications[id]['notification'];
 		notification.style.animation = "revert-layer";
 		notification.classList.add("hide");
 		delete os.notification.notifications[id];
