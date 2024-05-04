@@ -332,8 +332,8 @@ os.notification = {
 	lastCallTime: {},
 	notifications: {},
 	timeInterval: 100,
-	create: async (icon, owner, message, action) => {
-		var trace = await getStackTrace();
+	create: (icon, owner, message, action) => {
+		var trace = getStackTrace();
 		if (os.notification.lastCallTime[trace.join("\n")]) {
 			if (Date.now() - os.notification.lastCallTime[trace.join("\n")] < os.notification.timeInterval) return;
 		}

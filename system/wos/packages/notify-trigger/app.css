@@ -1,0 +1,37 @@
+.n-t-window input, .n-t-window textarea {
+    border: 1px solid rgb(191 191 191);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    width: -webkit-fill-available;
+    resize: vertical;
+    outline: none;
+}
+
+.n-t-window {
+    padding: 18px 32px 24px;
+    overflow: auto;
+    max-height: 100%;
+    box-sizing: border-box;
+}
+
+.n-t-window input:focus, .n-t-window textarea:focus {
+    box-shadow: rgba(171, 171, 171, .25) 0px 0px 0px 3px;
+    outline: none;
+}
+
+.n-t-window .wui-button {
+    margin-bottom: 6px;
+}
+
+.n-t-window [data-element="result"] {
+    white-space: normal;
+    max-width: -webkit-fill-available;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+.n-t-window label {
+    font-size: 14px;
+    margin-bottom: 6px;
+}

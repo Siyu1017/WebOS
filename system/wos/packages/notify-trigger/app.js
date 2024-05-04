@@ -10,12 +10,27 @@
     });
     
     var browseWindow = await app.execute(`
-    <input placeholder="Icon" data-element="icon">
-    <input placeholder="Title" data-element="host">
-    <input placeholder="Message" data-element="message">
-    <textarea placeholder="Action" data-element="action"></textarea>
-    <button data-element="run">Trigger</button>
-    <div data-element="result"><div>`);
+    <div class="n-t-window">
+        <h2>Notification Trigger</h2>
+        <div class="group">
+            <label>Icon</label>
+            <input placeholder="Icon" data-element="icon">
+        </div>
+        <div class="group">
+            <label>Title</label>
+            <input placeholder="Title" data-element="host">
+        </div>
+        <div class="group">
+            <label>Message</label>
+            <input placeholder="Message" data-element="message">
+        </div>
+        <div class="group">
+            <label>Action</label>
+            <textarea placeholder="Action" data-element="action"></textarea>
+        </div>
+        <button data-element="run" class="wui-button">Trigger</button>
+        <div data-element="result"><div>
+    </div>`);
     
     var root = browseWindow.elements.window;
 
@@ -26,7 +41,6 @@
     var result = root.querySelector('[data-element="result"]')    
 
     root.querySelector('[data-element="run"]').addEventListener("click", () => {
-        if (icon.value == '' || host.value == '' || message.value == '' || action.value == '') return;
         var func = () => {};
         try {
             func = new Function(action.value);
@@ -35,5 +49,7 @@
         result.innerHTML = id;
     })
 
-    setTimeout(app.hideLoading, 500)
+    app.loadStyles("./system/wos/packages/notify-trigger/app.css", "url", () => {
+        setTimeout(app.hideLoading, 500)
+    })
 })();
