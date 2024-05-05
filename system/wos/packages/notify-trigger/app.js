@@ -34,6 +34,9 @@
     
     var root = browseWindow.elements.window;
 
+    root.classList.add("wui-system");
+    root.classList.add("n-t-toolbar");
+
     var icon = root.querySelector('[data-element="icon"]')
     var host = root.querySelector('[data-element="host"]')
     var message = root.querySelector('[data-element="message"]')

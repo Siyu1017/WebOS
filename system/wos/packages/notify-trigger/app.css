@@ -13,6 +13,7 @@
     overflow: auto;
     max-height: 100%;
     box-sizing: border-box;
+    height: -webkit-fill-available;
 }
 
 .n-t-window input:focus, .n-t-window textarea:focus {
@@ -34,4 +35,24 @@
 .n-t-window label {
     font-size: 14px;
     margin-bottom: 6px;
+}
+
+[data-theme="dark"] .n-t-window {
+    color: #fff;
+    background: rgb(40 39 39);
+}
+
+[data-theme="dark"] .n-t-window input, [data-theme="dark"] .n-t-window textarea {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgb(83 83 83);
+}
+
+[data-theme="dark"] .n-t-window input:focus, [data-theme="dark"] .n-t-window textarea:focus {
+    box-shadow: rgb(126 126 126 / 25%) 0px 0px 0px 3px;
+}
+
+[data-theme="dark"] .n-t-toolbar .window-frame-application-toolbar, [data-theme="dark"] .n-t-toolbar .window-frame-application-loading {
+    color: #fff !important;
+    background: rgb(40 39 39) !important;
 }
