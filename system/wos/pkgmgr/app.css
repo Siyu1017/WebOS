@@ -4,10 +4,10 @@
 }
 
 .package-list {
-    padding: 1rem 1.5rem;
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    display: none;
 }
 
 .package {
@@ -39,7 +39,7 @@
     opacity: .7;
     pointer-events: none;
 }
- 
+
 .package.disabled {
     opacity: .5;
     pointer-events: none;
@@ -98,4 +98,245 @@ input[type="checkbox"]:checked {
 
 .wui-button:active {
     opacity: .7;
+}
+
+.package-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 0px;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    margin-bottom: -18px;
+    z-index: 9;
+}
+
+.package-type.active {
+    background: var(--windows11-ui-input-defualt-color);
+    color: #fff;
+    border: 1px solid var(--windows11-ui-input-defualt-color);
+}
+
+.package-type {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: var(--windows11-ui-input-outline-border);
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: all .1s ease-in-out;
+}
+
+.package-lists {
+    display: flex;
+    flex-direction: row;
+    padding: 1rem 1.5rem;
+    position: relative;
+}
+
+.package-list.active {
+    width: -webkit-fill-available;
+    flex: 1;
+    display: revert-layer;
+}
+
+.package-upload {
+    padding: 6px 12px;
+    border: var(--windows11-ui-input-outline-border);
+    border-radius: 6px;
+    margin: 8px auto;
+}
+
+[data-element="app"] {
+    padding: 6px 12px;
+    border: var(--windows11-ui-input-outline-border);
+    border-radius: 6px;
+    outline: none;
+}
+
+.package-manager {
+    max-height: 100%;
+    overflow: auto;
+}
+
+.package-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    display: none;
+}
+
+.package {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    padding: .25rem 1rem;
+    border-radius: 6px;
+}
+
+.package:hover {
+    background: rgba(248, 248, 248, .84);
+}
+
+.package-manager * {
+    box-sizing: border-box;
+}
+
+.package-operate {
+    display: flex;
+    align-items: center;
+}
+
+.package-enable .webos-loading-spinner {
+    display: none;
+}
+
+.package-enable.loading {
+    opacity: .7;
+    pointer-events: none;
+}
+
+.package.disabled {
+    opacity: .5;
+    pointer-events: none;
+    user-select: none;
+    cursor: not-allowed;
+}
+
+.package-enable.loading .package-enable-title {
+    display: none;
+}
+
+.package-enable.loading .webos-loading-spinner {
+    display: block;
+}
+
+:root {
+    --windows11-ui-input-defualt-color: #0069c4;
+    --windows11-ui-input-defualt-text: #fff;
+    --windows11-ui-input-outline-color: #fff;
+    --windows11-ui-input-outline-text: #000;
+    --windows11-ui-input-outline-border: 1px solid rgb(211, 211, 211);
+}
+
+.wui * {
+    box-sizing: border-box;
+}
+
+input[type="checkbox"]:checked {
+    /*border: 1px solid rgb(191, 191, 191);*/
+    background-color: var(--windows11-ui-input-defualt-color);
+}
+
+.wui-button {
+    background: var(--windows11-ui-input-defualt-color);
+    color: var(--windows11-ui-input-defualt-text);
+    border: 1px solid transparent;
+    font-weight: 500;
+    padding: 6px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: fit-content;
+    height: fit-content;
+    user-select: none;
+}
+
+.wui-button.outline {
+    background: var(--windows11-ui-input-outline-color);
+    color: var(--windows11-ui-input-outline-text);
+    box-shadow: rgba(99, 99, 99, 0.1) 0px 1px 1px 0px;
+    border: var(--windows11-ui-input-outline-border);
+}
+
+.wui-button:hover {
+    opacity: .95;
+}
+
+.wui-button:active {
+    opacity: .7;
+}
+
+.package-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 0px;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    margin-bottom: -18px;
+    z-index: 9;
+}
+
+.package-type.active {
+    background: var(--windows11-ui-input-defualt-color);
+    color: #fff;
+    border: 1px solid var(--windows11-ui-input-defualt-color);
+}
+
+.package-type {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: var(--windows11-ui-input-outline-border);
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: all .1s ease-in-out;
+}
+
+.package-lists {
+    display: flex;
+    flex-direction: row;
+    padding: 1rem 1.5rem;
+    position: relative;
+}
+
+.package-list.active {
+    width: -webkit-fill-available;
+    flex: 1;
+    display: revert-layer;
+}
+
+.package-upload {
+    padding: 6px 12px;
+    border: var(--windows11-ui-input-outline-border);
+    border-radius: 6px;
+    margin: 4px auto 8px;
+    width: -webkit-fill-available;
+}
+
+[data-element="app"] {
+    padding: 8px 12px;
+    border: var(--windows11-ui-input-outline-border);
+    border-radius: 6px;
+    outline: none;
+    width: -webkit-fill-available;
+    margin: 4px 0 8px;
+}
+
+.package-list label {
+    font-size: 14px;
+}
+
+.local-packages {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 16px 0 8px;
+}
+
+.local-packages .package {
+    display: flex;
+    align-items: center;
+    padding: .5rem 1rem;
+}
+
+.package-manager input {
+    transition: all .1s ease-in-out;
+}
+
+.package-manager input:focus {
+    box-shadow: rgba(171, 171, 171, .25) 0px 0px 0px 3px;
+    outline: none;
 }

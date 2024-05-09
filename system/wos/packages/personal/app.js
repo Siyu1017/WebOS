@@ -84,7 +84,7 @@
             await delay(500);
             var image = name.replace("$", bg);
             load(image).finally(async () => {
-                document.body.style.backgroundImage = `url(${image})`;
+                $(".window-background").style.backgroundImage = `url(${image})`;
                 if (dark[i] == 1) {
                     document.documentElement.setAttribute("data-theme", "dark");
                     // frame.elements.content.querySelector('[data-select="personal-theme"]').classList.add("dark");
@@ -114,7 +114,7 @@
         var bg = bgs[index];
         var image = name.replace("$", bg);
         return load(image).then(async () => {
-            document.body.style.backgroundImage = `url(${image})`;
+            $(".window-background").style.backgroundImage = `url(${image})`;
             window.theme = dark[index] == 1 ? "dark" : "light";
             if (dark[index] == 1) {
                 document.documentElement.setAttribute("data-theme", "dark");

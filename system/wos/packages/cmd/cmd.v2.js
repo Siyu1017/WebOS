@@ -10,7 +10,7 @@
         icon: "./system/wos/packages/cmd/cmd.png"
     });
 
-    const HACK_PANEL_VERSION = "1.2.0";
+    const CMD_VERSION = "1.0.0";
 
     await fetch("./system/wos/packages/cmd/app.css").then(res => {
         return res.text();
@@ -21,7 +21,6 @@
     }).finally(() => {
         return;
     })
-
 
     var browseWindow = await app.execute(`<div class="cmd">
     <div class="terminal">
@@ -106,24 +105,20 @@
 
         Date.prototype.format = function (fmt) { var o = { "M+": this.getMonth() + 1, "d+": this.getDate(), "h+": this.getHours(), "m+": this.getMinutes(), "s+": this.getSeconds(), "q+": Math.floor((this.getMonth() + 3) / 3), "S": this.getMilliseconds() }; if (/(y+)/.test(fmt)) { fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length)); } for (var k in o) { if (new RegExp("(" + k + ")").test(fmt)) { fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length))); } } return fmt; };
 
-        function initHackPanel() {
+        function initCmd() {
             terminal_lines.innerHTML =
                 `                                      
 <div class="terminal-group">
             <div class="terminal-typed">
-                <div class="terminal-line">WebOS Command [Version ${HACK_PANEL_VERSION}]</div>
+                <div class="terminal-line">WebOS Command [Version ${CMD_VERSION}]</div>
                 <div class="terminal-line">(c) WebOS. All rights reserved.</div>
-                <!--div class="terminal-line"><br></div>
-                <div class="terminal-line">░▒█░▒█░█▀▀▄░▒█▀▀▄░▒█░▄▀░░░▒█▀▀█░█▀▀▄░▒█▄░▒█░▒█▀▀▀░▒█░░░</div>
-                <div class="terminal-line">░▒█▀▀█▒█▄▄█░▒█░░░░▒█▀▄░░░░▒█▄▄█▒█▄▄█░▒█▒█▒█░▒█▀▀▀░▒█░░░</div>
-                <div class="terminal-line">░▒█░▒█▒█░▒█░▒█▄▄▀░▒█░▒█░░░▒█░░░▒█░▒█░▒█░░▀█░▒█▄▄▄░▒█▄▄█</div-->
                 <div class="terminal-line"><br></div>
                 <div class="terminal-line">Type "help" for available commands</div>
             </div></div>
 `;
         }
 
-        initHackPanel();
+        initCmd();
 
         function generateResponse(id) {
             var parent = terminal_lines.querySelector(`[data-id="${id}"]`);
@@ -329,7 +324,7 @@
             },
             version: (content, id) => {
                 var api = generateResponse(id);
-                return api.createLineFromArray([`Version: ${HACK_PANEL_VERSION}`])
+                return api.createLineFromArray([`Version: ${CMD_VERSION}`])
             },
             date: (content, id) => {
                 var api = generateResponse(id);
@@ -345,7 +340,7 @@
             },
             clear: () => {
                 setTimeout(() => {
-                    initHackPanel();
+                    initCmd();
                 }, 500)
             },
             prank: (content, id) => {
@@ -611,6 +606,84 @@
                 terminal_typein.style.height = "10px";
                 terminal_typein.style.height = terminal_input.scrollHeight + 'px';
             }, 100);
+        }
+
+        var cmd = {
+            commands: {},
+            print: async (content) => {
+                function isFile(input) {
+                    if ('File' in window && input instanceof File)
+                        return true;
+                    else return false;
+                }
+
+                function isBlob(input) {
+                    if ('Blob' in window && input instanceof Blob)
+                        return true;
+                    else return false;
+                }
+
+                if (isBlob(content) || isFile(content)) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        content = reader.result;
+                        console.log(content);
+                    }
+                    await reader.readAsText(content);
+                } else {
+                    console.log(content);
+                }
+            },
+            prompt: (tip) => {
+                
+            },
+            hook: (name, object) => {
+                commands[name] = commands[name] ? _.mergeDeep(commands[name], object) : object;
+            }
+        };
+
+        function commandParser(command) {
+            var api = generateResponse(id);
+            if (current[cmd[0]]) {
+                if (isFunction(current[cmd[0]]) && current[cmd[0]].name.slice(0, 2) != "__") {
+                    return current[cmd[0]](cmd.slice(1).join(" "), id);
+                } else if (cmd.length == 1) {
+                    var list = Object.keys(current[cmd[0]]);
+                    if (list.length < 1) {
+                        if (isFunction(current["__err"])) {
+                            current["__err"](current[cmd[0]].name.slice(0, 2) == "__" ? cmd.join(" ") : cmd.slice(1).join(" "), id, "0");
+                        } else {
+                            api.createLineFromArray([
+                                `'${formatString(cmd.join(" "))}' is not recognized as an internal or external command,`,
+                                `operable program or batch file.`,
+                                '',
+                                `Type "help" for available commands`
+                            ], "red")
+                        }
+                    } else {
+                        var command_list = Object.keys(current[cmd[0]]);
+                        command_list.forEach((command, i) => {
+                            if (command.slice(0, 2) == "__") {
+                                command_list.splice(i, 1);
+                            }
+                        })
+                        api.createLineFromArray(command_list);
+                    }
+                } else {
+                    cmdParser(cmd.slice(1), id, current[cmd[0]]);
+                }
+            } else {
+                if (isFunction(current["__err"])) {
+                    return current["__err"](Array.isArray(cmd) ? cmd.join(" ") : "", id, "0");
+                } else {
+                    api.createLineFromArray([
+                        `'${formatString(Array.isArray(cmd) ? cmd.join(" ") : ""/*, true*/)}' is not recognized as an internal or external command,`,
+                        `operable program or batch file.`,
+                        '',
+                        `Type "help" for available commands`
+                    ], "red");
+                }
+            }
         }
 
         function runCommand(command) {

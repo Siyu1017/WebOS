@@ -112,6 +112,30 @@
         "version": "1.0.0"
     },
     {
+        "name": "Virus - Vibration",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-vibration/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Virus - Ghost",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-ghost/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "name": "Virus - Rainbow",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-rainbow/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
         "name": "Restart",
         "author": "WebOS, Siyu1017",
         "scripts": [

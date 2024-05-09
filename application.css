@@ -7,16 +7,27 @@ body {
 	height: 100vh;
 	margin: 0;
 	overflow: hidden;
-	background-image: url(./system/bg/img0.jpg);
-	background-size: cover;
-	background-repeat: no-repeat;
-	background-position: 50% 50%;
 	touch-action: manipulation;
 	-ms-content-zooming: none;
 	-ms-touch-action: manipulation;
 	zoom: reset;
 	zoom: 1;
 	transition: all .3s ease-in-out;
+	background: none !important;
+}
+
+.window-background {
+	background-image: url(./system/bg/img0.jpg);
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	transition: all .3s ease-in-out;
+	width: 100vw;
+	height: 100vh;
+	z-index: -1;
+	position: absolute;
+	left: 0;
+	top: 0;
 }
 
 .window-frame {
@@ -645,9 +656,10 @@ input[type="checkbox"]:checked {
 	/* max-height: 90px; */
 	/* min-height: 60px; */
 	opacity: 0;
-	z-index: -1;
-	transition: all .1s ease-in-out;
+	transition: all .12s ease-in-out;
 	overflow: hidden;
+	z-index: 9;
+	pointer-events: none;
 }
 
 .thumbnail-window-view {
@@ -659,6 +671,7 @@ input[type="checkbox"]:checked {
 .thumbnail-window.active {
 	opacity: 1;
 	z-index: 9;
+	pointer-events: auto;
 }
 
 .thumbnail-window-icon {

@@ -76,7 +76,17 @@ var last_click_app = null;
 var side_data = "";
 var max_z_index = 9;
 
-var running_apps = {};
+var running_apps_observers = [];
+
+var running_apps = new Proxy({}, {
+	set: function (obj, prop, value) {
+		obj[prop] = value;
+
+		running_apps_observers.forEach(obs => obs({ obj, prop, value }));
+
+		return true;
+	}
+});
 
 var animation_setting = {
 	duration: 200,
@@ -1008,16 +1018,16 @@ function setThumbnailWindow(app) {
 	cloneNode.style.transform = `scale(${scale})`;
 	cloneNode.style.opacity = "1";
 	thumbnail_view.appendChild(cloneNode);
-	var left = getPosition(app.app_icon).x + app.app_icon.offsetWidth / 2 - cloneNode.offsetWidth * scale / 2;
-	if (left < 12) {
-		left = 12;
-	}
-	thumbnail_window.style.left = left + "px";
 	thumbnail_view.style.width = cloneNode.offsetWidth * scale + "px";
 	thumbnail_view.style.height = cloneNode.offsetHeight * scale + "px";
 	thumbnail_window.style.maxWidth = cloneNode.offsetWidth * scale + thumbnail_setting.padding.left + thumbnail_setting.padding.right + "px";
 	thumbnail_window.style.padding = "6px";
 	thumbnail_title.innerHTML = app.settings.title.trim() == "" ? "Application" : formatString(app.settings.title || "Application");
+	var left = getPosition(app.app_icon).x + app.app_icon.offsetWidth / 2 - cloneNode.offsetWidth * scale / 2;
+	if (left < 12) {
+		left = 12;
+	}
+	thumbnail_window.style.left = left + "px";
 	thumbnail_icon.src = app.settings.icon || "./application.png";
 }
 
@@ -1826,25 +1836,33 @@ class App {
 		}
 
 		function changeIcon(url) {
-			appSettings.icon = url;
-			app_icon.querySelector(".window-taskbar-application-icon-image").src = url;
-			app_icon.querySelector(".window-taskbar-application-icon-image").onerror = () => {
-				var error = document.createElement("div");
-				error.className = "error-image";
-				handleImageError(app_icon.querySelector(".window-taskbar-application-icon-image"), error, "./application.png");
-			}
-			icon.src = url;
-			icon.onerror = () => {
-				var error = document.createElement("div");
-				error.className = "error-image";
-				handleImageError(icon, error, "./application.png");
+			try {
+				appSettings.icon = url;
+				app_icon.querySelector(".window-taskbar-application-icon-image").src = url;
+				app_icon.querySelector(".window-taskbar-application-icon-image").onerror = () => {
+					var error = document.createElement("div");
+					error.className = "error-image";
+					handleImageError(app_icon.querySelector(".window-taskbar-application-icon-image"), error, "./application.png");
+				}
+				icon.src = url;
+				icon.onerror = () => {
+					var error = document.createElement("div");
+					error.className = "error-image";
+					handleImageError(icon, error, "./application.png");
+				}
+			} catch (e) {
+				console.log(`Can not change icon, message: ${e.message}`);
 			}
 		}
 
 		function changeTitle(title) {
 			if (!title) return;
-			appSettings.title = title;
-			title_text.innerHTML = formatString(title);
+			try {
+				appSettings.title = title;
+				title_text.innerHTML = formatString(title);
+			} catch (e) {
+				console.log(`Can not change title, message: ${e.message}`);
+			}
 		}
 
 		if (callback) {
@@ -1862,6 +1880,9 @@ class App {
 			toolbar: toolbar,
 			content: content
 		}
+
+		this.changeIcon = changeIcon;
+		this.changeTitle = changeTitle;
 
 		running_apps[this.hash] = this;
 
