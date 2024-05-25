@@ -1,5 +1,13 @@
 [
     {
+        "name": "Task Manager",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/taskmgr/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
         "name": "Command",
         "author": "WebOS, Siyu1017",
         "scripts": [

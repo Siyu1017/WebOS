@@ -76,17 +76,295 @@
             event.preventDefault();
         });
 
+        $(".window-taskbar").addEventListener("contextmenu", (e) => {
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+            try {
+                System.showTaskBarContextMenu([
+                /* {
+                    type: 'label',
+                    header: 'Actions'
+                }, {
+                    type: 'separation'
+                }, */ {
+                    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M17 12h-2l-2 5-2-10-2 5H7"/></svg>',
+                    header: 'Task Manager',
+                    action: () => {
+                        System.loadApp(0, ["packages/taskmgr/app"]);
+                    }
+                }], e);
+            } catch (e) { }
+        })
+
         window.oncontextmenu = () => { return false; };
 
-        document.onclick = () => {
-            $(".window-contextmenu").classList.remove("window-contextmenu-show");
+        function getnodeType(node) {
+            if (node.nodeType == 1) return node.tagName.toLowerCase();
+            else return node.nodeType;
+        };
+        function clean(node) {
+            for (var n = 0; n < node.childNodes.length; n++) {
+                var child = node.childNodes[n];
+                if (
+                    child.nodeType === 8 ||
+                    (child.nodeType === 3 && !/\S/.test(child.nodeValue) && child.nodeValue.includes('\n'))
+                ) {
+                    node.removeChild(child);
+                    n--;
+                } else if (child.nodeType === 1) {
+                    clean(child);
+                }
+            }
         }
+
+        function parseHTML(str) {
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(str, 'text/html');
+            clean(doc.body);
+            return doc.body;
+        }
+
+        function attrbutesIndex(el) {
+            var attributes = {};
+            if (el.attributes == undefined) return attributes;
+            for (var i = 0, atts = el.attributes, n = atts.length; i < n; i++) {
+                attributes[atts[i].name] = atts[i].value;
+            }
+            return attributes;
+        }
+        function patchAttributes(vdom, dom) {
+            let vdomAttributes = attrbutesIndex(vdom);
+            let domAttributes = attrbutesIndex(dom);
+            if (vdomAttributes == domAttributes) return;
+            Object.keys(vdomAttributes).forEach((key, i) => {
+                //if the attribute is not present in dom then add it
+                if (!dom.getAttribute(key)) {
+                    dom.setAttribute(key, vdomAttributes[key]);
+                } //if the atrtribute is present than compare it
+                else if (dom.getAttribute(key)) {
+                    if (vdomAttributes[key] != domAttributes[key]) {
+                        dom.setAttribute(key, vdomAttributes[key]);
+                    }
+                }
+            });
+            Object.keys(domAttributes).forEach((key, i) => {
+                //if the attribute is not present in vdom than remove it
+                if (!vdom.getAttribute(key)) {
+                    dom.removeAttribute(key);
+                }
+            });
+        }
+
+        function diff(vdom, dom) {
+            //if dom has no childs then append the childs from vdom
+            if (dom.hasChildNodes() == false && vdom.hasChildNodes() == true) {
+                for (var i = 0; i < vdom.childNodes.length; i++) {
+                    //appending
+                    dom.append(vdom.childNodes[i].cloneNode(true));
+                }
+            } else {
+                //if both nodes are equal then no need to compare farther
+                if (vdom.isEqualNode(dom)) return;
+                //if dom has extra child
+                if (dom.childNodes.length > vdom.childNodes.length) {
+                    let count = dom.childNodes.length - vdom.childNodes.length;
+                    if (count > 0) {
+                        for (; count > 0; count--) {
+                            dom.childNodes[dom.childNodes.length - count].remove();
+                        }
+                    }
+                }
+                //now comparing all childs
+                for (var i = 0; i < vdom.childNodes.length; i++) {
+                    //if the node is not present in dom append it
+                    if (dom.childNodes[i] == undefined) {
+                        dom.append(vdom.childNodes[i].cloneNode(true));
+                        // console.log("appenidng",vdom.childNodes[i])
+                    } else if (getnodeType(vdom.childNodes[i]) == getnodeType(dom.childNodes[i])) {
+                        //if same node type
+                        //if the nodeType is text
+                        if (vdom.childNodes[i].nodeType == 3) {
+                            //we check if the text content is not same
+                            if (vdom.childNodes[i].textContent != dom.childNodes[i].textContent) {
+                                //replace the text content
+                                dom.childNodes[i].textContent = vdom.childNodes[i].textContent;
+                            }
+                        } else {
+                            patchAttributes(vdom.childNodes[i], dom.childNodes[i])
+                        }
+                    } else {
+                        //replace
+                        dom.childNodes[i].replaceWith(vdom.childNodes[i].cloneNode(true));
+                    }
+                    if (vdom.childNodes[i].nodeType != 3) {
+                        diff(vdom.childNodes[i], dom.childNodes[i])
+                    }
+                }
+            }
+        }
+
+        /*
+        let vdom = parseHTML(`
+        <h1 style="color:green">Hello</h1>
+        <p>This is a page</p>
+        <p>some more text</p>`);
+        
+        let dom = document.getElementById('node');
+        clean(dom);
+        console.log(vdom)
+        
+        document.querySelector('button').addEventListener('click', function () {
+            diff(vdom, dom);
+        })
+        */
+
+        System.showTaskBarContextMenu = (list, e) => {
+            $(".window-task-bar-contextmenu").innerHTML = '';
+
+            function parseHTML(str) {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(str, 'text/html');
+                clean(doc.body);
+                return doc.body.firstChild;
+            }
+
+            list.forEach(item => {
+                try {
+                    if (item.type == 'label') {
+                        var labelElement = document.createElement('div');
+                        labelElement.classList.add("window-task-bar-contextmenu-label");
+                        labelElement.innerHTML = formatString(item.header);
+                        $(".window-task-bar-contextmenu").appendChild(labelElement);
+                    } else if (item.type == 'separation') {
+                        var separationElement = document.createElement('div');
+                        separationElement.classList.add("window-task-bar-contextmenu-separation");
+                        $(".window-task-bar-contextmenu").appendChild(separationElement);
+                    } else {
+                        var itemElement = document.createElement('div');
+                        itemElement.classList.add("window-task-bar-contextmenu-item");
+                        if (item.class) {
+                            itemElement.classList.add(item.class);
+                        }
+                        itemElement.innerHTML = `
+                <div class="window-task-bar-contextmenu-item-icon"></div>
+                <div class="window-task-bar-contextmenu-item-header">${formatString(item.header)}</div>
+                `;
+                        var iconElement = parseHTML(item.icon);
+                        iconElement.classList.add("window-task-bar-contextmenu-item-icon-inner");
+                        itemElement.querySelector(".window-task-bar-contextmenu-item-icon").appendChild(iconElement);
+                        itemElement.addEventListener('click', () => {
+                            System.hideTaskBarContextMenu();
+                            item.action instanceof Function ? item.action() : null;
+                        })
+                        $(".window-task-bar-contextmenu").appendChild(itemElement);
+                    }
+                } catch (e) { }
+            })
+
+            try {
+                if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+                    var touch = e.touches[0] || e.changedTouches[0];
+                    e.pageX = touch.pageX;
+                    e.pageY = touch.pageY;
+                }
+
+                $(".window-task-bar-contextmenu").style.left = e.pageX + 'px';
+            } catch (e) { }
+
+            $(".window-task-bar-contextmenu").style.animation = 'show-task-bar-contextmenu 300ms cubic-bezier(.3,.94,.71,.94) 0s 1 forwards';
+            $(".window-task-bar-contextmenu").classList.add("window-task-bar-contextmenu-show");
+            $(".window-task-bar-contextmenu").addEventListener("animationend", () => {
+                $(".window-task-bar-contextmenu").style.animation = "";
+            })
+
+            if (e.pageX + $(".window-task-bar-contextmenu").offsetWidth > window.innerWidth) {
+                $(".window-task-bar-contextmenu").style.left = window.innerWidth - $(".window-task-bar-contextmenu").offsetWidth - 8 + 'px';
+            }
+        }
+
+        System.hideTaskBarContextMenu = () => {
+            $(".window-task-bar-contextmenu").classList.remove("window-task-bar-contextmenu-show");
+            $(".window-task-bar-contextmenu").innerHTML = '';
+        }
+
+        document.addEventListener("click", (e) => {
+            if (e.target == $(".window-task-bar-contextmenu") || $(".window-task-bar-contextmenu").contains(e.target)) return;
+            System.hideTaskBarContextMenu();
+        }, true)
+
+
+        System.showContextMenu = (list, e) => {
+            $(".window-contextmenu").innerHTML = '';
+            try {
+                if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+                    var touch = e.touches[0] || e.changedTouches[0];
+                    e.pageX = touch.pageX;
+                    e.pageY = touch.pageY;
+                }
+
+                $(".window-contextmenu").style.left = e.pageX + 'px';
+                $(".window-contextmenu").style.top = e.pageY + 'px';
+            } catch (e) { }
+
+            function parseHTML(str) {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(str, 'text/html');
+                clean(doc.body);
+                return doc.body.firstChild;
+            }
+
+            list.forEach(item => {
+                try {
+                    if (item.type == 'label') {
+                        var labelElement = document.createElement('div');
+                        labelElement.classList.add("window-contextmenu-label");
+                        labelElement.innerHTML = formatString(item.header);
+                        $(".window-contextmenu").appendChild(labelElement);
+                    } else if (item.type == 'separation') {
+                        var separationElement = document.createElement('div');
+                        separationElement.classList.add("window-contextmenu-separation");
+                        $(".window-contextmenu").appendChild(separationElement);
+                    } else {
+                        var itemElement = document.createElement('div');
+                        itemElement.classList.add("window-contextmenu-item");
+                        if (item.class) {
+                            itemElement.classList.add(item.class);
+                        }
+                        itemElement.innerHTML = `
+                <div class="window-contextmenu-item-icon"></div>
+                <div class="window-contextmenu-item-header">${formatString(item.header)}</div>
+                `;
+                        var iconElement = parseHTML(item.icon);
+                        iconElement.classList.add("window-contextmenu-item-icon-inner");
+                        itemElement.querySelector(".window-contextmenu-item-icon").appendChild(iconElement);
+                        itemElement.addEventListener('click', () => {
+                            System.hideContextMenu();
+                            item.action instanceof Function ? item.action() : null;
+                        })
+                        $(".window-contextmenu").appendChild(itemElement);
+                    }
+                } catch (e) { }
+            })
+
+            $(".window-contextmenu").classList.add("window-contextmenu-show");
+        }
+
+        System.hideContextMenu = () => {
+            $(".window-contextmenu").classList.remove("window-contextmenu-show");
+            $(".window-contextmenu").innerHTML = '';
+        }
+
+        document.addEventListener("click", (e) => {
+            if (e.target == $(".window-contextmenu") || $(".window-contextmenu").contains(e.target)) return;
+            System.hideContextMenu();
+        }, true)
 
         window.onerror = (message) => {
             var notification = os.notification.create("./error.png", "Error", message);
 
             console.log(notification);
-            
+
             new App("ERROR" + Date.now(), null, {
                 x: window.innerWidth / 2 - 120,
                 y: (window.innerHeight - 45) / 2 - 60,

@@ -85,6 +85,15 @@ var running_apps = new Proxy({}, {
 		running_apps_observers.forEach(obs => obs({ obj, prop, value }));
 
 		return true;
+	},
+	deleteProperty(target, prop) {
+		if (prop in target) {
+			delete target[prop];
+
+			running_apps_observers.forEach(obs => obs({ prop, target }));
+
+			return true;
+		}
 	}
 });
 
@@ -621,7 +630,7 @@ class APP_Mover {
 	 * @param {Element} toolbarToggleFull 
 	 * @param {Object} config 
 	 */
-	constructor(app, mask, toolbar, toolbarControls, toolbarToggleFull, config, func, token) {
+	constructor(app, mask, toolbar, toolbarControls, toolbarToggleFull, config, apis) {
 		var last = {
 			x: 0,
 			y: 0
@@ -677,6 +686,7 @@ class APP_Mover {
 		}
 
 		function formatPos(pos, pre) {
+			if (config.fullscreenable == false) return null;
 			var res = {
 				x: pre == true ? settings.preview : 0,
 				y: pre == true ? settings.preview : 0,
@@ -722,6 +732,12 @@ class APP_Mover {
 				app.style.borderRadius = app_data.useBoundary == true ? 0 : "revert-layer";
 				app_data.fullMode = false;
 			}
+			if (app_data.boundary != null) {
+				apis.triggerEvent('resize', {
+					width: formatPos(app_data.boundary).width,
+					height: formatPos(app_data.boundary).height
+				})
+			}
 			setTimeout(() => {
 				app.style.transition = "";
 			}, animation_setting.duration)
@@ -738,6 +754,10 @@ class APP_Mover {
 					x: e.pageX,
 					y: e.pageY
 				}
+				apis.triggerEvent('resize', {
+					width: app.offsetWidth,
+					height: app.offsetHeight
+				})
 				$(".window-frame-application-content-mask", true).forEach(mask => {
 					mask.style.display = "block";
 				})
@@ -835,7 +855,7 @@ class APP_Mover {
 			if (app_data.dragging == false) return;
 			app_data.x = getPosition(app).x;
 			app_data.y = getPosition(app).y;
-			if (app_data.boundary != null) {
+			if (app_data.boundary != null && config.fullscreenable != false) {
 				app.style.transition = `all ${animation_setting.duration}ms ${animation_setting.timingFunction}`;
 				app_data.useBoundary = true
 				app.style.left = formatPos(app_data.boundary).x + "px";
@@ -854,6 +874,12 @@ class APP_Mover {
 				}
 				app.style.borderRadius = 0;
 				app.style.boxShadow = "none";
+
+				apis.triggerEvent('resize', {
+					width: formatPos(app_data.boundary).width,
+					height: formatPos(app_data.boundary).height
+				})
+
 				setTimeout(() => {
 					app.style.transition = "";
 				}, animation_setting.duration)
@@ -1279,6 +1305,22 @@ class App {
 	}
 	minimizeWindow = null;
 	unminimizeWindow = null;
+	listeners = {};
+	addListener(listener, callback) {
+		if (this.listeners[listener]) {
+			this.listeners[listener].push(callback);
+		} else {
+			this.listeners[listener] = [];
+			this.listeners[listener].push(callback);
+		}
+	}
+	triggerEvent(event, details) {
+		if (this.listeners[event]) {
+			this.listeners[event].forEach(callback => {
+				callback(details);
+			})
+		}
+	}
 	execute(con, callback, config) {
 		/**
 		 * @var {string|HTMLElement} con
@@ -1421,7 +1463,7 @@ class App {
 			}
 
 			if (appSettings.movable == true) {
-				new APP_Mover(parent, mask, toolbar, action, full == false ? document.createElement("div") : full, appSettings)
+				new APP_Mover(parent, mask, toolbar, action, full == false ? document.createElement("div") : full, appSettings, this)
 
 				/*
 				dragger(title).On("dragstart", (e) => {
@@ -1836,6 +1878,7 @@ class App {
 		}
 
 		function changeIcon(url) {
+			if (!url || url == appSettings.icon) return;
 			try {
 				appSettings.icon = url;
 				app_icon.querySelector(".window-taskbar-application-icon-image").src = url;
@@ -1850,16 +1893,18 @@ class App {
 					error.className = "error-image";
 					handleImageError(icon, error, "./application.png");
 				}
+				running_apps_observers.forEach(obs => obs())
 			} catch (e) {
 				console.log(`Can not change icon, message: ${e.message}`);
 			}
 		}
 
 		function changeTitle(title) {
-			if (!title) return;
+			if (!title || title == appSettings.title) return;
 			try {
 				appSettings.title = title;
 				title_text.innerHTML = formatString(title);
+				running_apps_observers.forEach(obs => obs())
 			} catch (e) {
 				console.log(`Can not change title, message: ${e.message}`);
 			}
@@ -1883,6 +1928,10 @@ class App {
 
 		this.changeIcon = changeIcon;
 		this.changeTitle = changeTitle;
+
+		this.close = this.close;
+
+		this.stackTrace = getStackTrace();
 
 		running_apps[this.hash] = this;
 

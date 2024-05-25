@@ -6,7 +6,6 @@
         height: 300,
         fullscreenable: false,
         closable: false,
-        movable: false,
         minimizable: false,
         y: (window.innerHeight - 45) / 2 - 150,
         x: window.innerWidth / 2 - 210,
