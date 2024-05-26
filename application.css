@@ -148,7 +148,11 @@ svg {
 	display: flex;
 	align-items: center;
 	z-index: 9;
-	position: relative;
+	position: fixed;
+	margin-top: auto;
+	margin-bottom: 0;
+	bottom: 0;
+	width: -webkit-fill-available;
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
@@ -256,9 +260,11 @@ svg {
 	padding: 4px;
 	z-index: 9;
 	box-sizing: border-box;
-	background: rgb(251, 251, 251);
+	background: rgb(251 251 251 / 94%);
 	user-select: none;
 	-webkit-user-drag: none;
+	backdrop-filter: blur(16px) saturate(1.8);
+	max-height: calc(100vh - var(--taskbar-height) - 16px);
 }
 
 .window-contextmenu.window-contextmenu-show {
@@ -267,7 +273,8 @@ svg {
 	gap: 4px;
 }
 
-.window-contextmenu-item, .window-task-bar-contextmenu-item {
+.window-contextmenu-item,
+.window-task-bar-contextmenu-item {
 	padding: 6px 10px;
 	cursor: pointer;
 	font-size: 12px;
@@ -283,7 +290,8 @@ svg {
 	transition: all .1s ease-in-out;
 }
 
-.window-contextmenu-item:hover, .window-task-bar-contextmenu-item:hover {
+.window-contextmenu-item:hover,
+.window-task-bar-contextmenu-item:hover {
 	background: var(--background-hover-color);
 	color: var(--font-hover-color);
 }
@@ -1063,79 +1071,87 @@ input[type="checkbox"]:checked {
 	border-radius: 4px;
 }
 
-.window-contextmenu-item-icon, .window-task-bar-contextmenu-item-icon {
+.window-contextmenu-item-icon,
+.window-task-bar-contextmenu-item-icon {
 	width: 16px;
 	height: 16px;
 	max-width: 16px;
 	max-height: 16px;
 }
 
-.window-contextmenu-item-header, .window-task-bar-contextmenu-item-header {
+.window-contextmenu-item-header,
+.window-task-bar-contextmenu-item-header {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-.window-contextmenu *, .window-task-bar-contextmenu * {
-    user-select: none;
-    -webkit-user-drag: none;
+.window-contextmenu *,
+.window-task-bar-contextmenu * {
+	user-select: none;
+	-webkit-user-drag: none;
 }
 
-.window-contextmenu-item.error, .window-task-bar-contextmenu-item.error {
-    --font-color: #fe3a4e;
-    --background-color: rgb(251, 251, 251);
-    --font-hover-color: #fff;
-    --background-hover-color: #dc3545;
+.window-contextmenu-item.error,
+.window-task-bar-contextmenu-item.error {
+	--font-color: #fe3a4e;
+	--background-color: none;
+	--font-hover-color: #fff;
+	--background-hover-color: #dc3545;
 }
 
-.window-contextmenu-item-icon-inner, .window-task-bar-contextmenu-item-icon-inner {
-    width: inherit;
-    height: inherit;
-    max-width: inherit;
-    max-height: inherit;
+.window-contextmenu-item-icon-inner,
+.window-task-bar-contextmenu-item-icon-inner {
+	width: inherit;
+	height: inherit;
+	max-width: inherit;
+	max-height: inherit;
 }
 
-.window-contextmenu-item *, .window-task-bar-contextmenu-item * {
-    pointer-events: none;
+.window-contextmenu-item *,
+.window-task-bar-contextmenu-item * {
+	pointer-events: none;
 }
 
-.window-contextmenu-label, .window-task-bar-contextmenu-label {
-    font-size: 12px;
-    padding: 4px 10px 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.window-contextmenu-label,
+.window-task-bar-contextmenu-label {
+	font-size: 12px;
+	padding: 4px 10px 2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
-.window-contextmenu-separation, .window-task-bar-contextmenu-separation {
-    width: 100%;
-    height: .5px;
-    background: rgba(0, 0, 0, 0.08);
+.window-contextmenu-separation,
+.window-task-bar-contextmenu-separation {
+	width: 100%;
+	height: .5px;
+	background: rgba(0, 0, 0, 0.08);
 }
 
 .window-task-bar-contextmenu.window-task-bar-contextmenu-show {
-    position: absolute;
-    bottom: calc(var(--taskbar-height) + 8px);
-    width: 150px;
-    height: fit-content;
-    border-radius: 6px;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 3px 12px 2px;
-    padding: 4px;
-    z-index: 8;
-    box-sizing: border-box;
-    user-select: none;
-    -webkit-user-drag: none;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    border: 1px solid rgba(0, 0, 0, .08);
-    box-sizing: border-box;
-    backdrop-filter: blur(16px) saturate(1.8);
-    background: rgb(255 255 255 / 90%);
-    border-radius: 8px;
-    font-size: 14px;
-    animation: none;
-    opacity: 1;
+	position: absolute;
+	bottom: calc(var(--taskbar-height) + 8px);
+	width: 150px;
+	height: fit-content;
+	border-radius: 6px;
+	box-shadow: rgba(99, 99, 99, 0.2) 0px 3px 12px 2px;
+	padding: 4px;
+	z-index: 8;
+	box-sizing: border-box;
+	user-select: none;
+	-webkit-user-drag: none;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	border: 1px solid rgba(0, 0, 0, .08);
+	box-sizing: border-box;
+	backdrop-filter: blur(16px) saturate(1.8);
+	background: rgb(255 255 255 / 90%);
+	border-radius: 8px;
+	font-size: 14px;
+	animation: none;
+	opacity: 1;
 	pointer-events: unset;
 }
 
@@ -1151,6 +1167,7 @@ input[type="checkbox"]:checked {
 		box-shadow: none;
 		transform: translateY(30%);
 	}
+
 	100% {
 		transform: translateY(0%);
 		box-shadow: rgba(99, 99, 99, 0.2) 0px 3px 12px 2px;
@@ -1158,25 +1175,63 @@ input[type="checkbox"]:checked {
 }
 
 [data-theme="dark"] .window-task-bar-contextmenu.window-task-bar-contextmenu-show {
-    background: rgb(42 42 42 / 80%);
-    border: 1px solid rgba(255, 255, 255, .05);
+	background: rgb(42 42 42 / 80%);
+	border: 1px solid rgba(255, 255, 255, .05);
 }
 
 [data-theme="dark"] .window-task-bar-contextmenu-item {
-    --font-color: #fff;
+	--font-color: #fff;
 }
 
 [data-theme="dark"] .window-task-bar-contextmenu-item:hover {
-    --font-color: #fff;
-    --background-color: none;
-    --font-hover-color: #fff;
-    --background-hover-color: rgb(87 87 87 / 28%);
+	--font-color: #fff;
+	--background-color: none;
+	--font-hover-color: #fff;
+	--background-hover-color: rgb(87 87 87 / 28%);
 }
 
 [data-theme="dark"] .window-task-bar-contextmenu-label {
-    color: #fff;
+	color: #fff;
 }
 
 [data-theme="dark"] .window-task-bar-contextmenu-separation {
-    background: rgba(255, 255, 255, .1);
+	background: rgba(255, 255, 255, .1);
+}
+
+[data-theme="dark"] .window-contextmenu {
+	background: rgb(42 42 42 / 90%);
+}
+
+[data-theme="dark"] .window-contextmenu-label {
+	color: rgb(241, 241, 241);
+}
+
+[data-theme="dark"] .window-contextmenu-separation {
+	background: rgba(255, 255, 255, .1);
+}
+
+[data-theme="dark"] .window-contextmenu-item {
+	--font-color: rgb(241, 241, 241);
+	--background-color: none;
+	--font-hover-color: rgb(241, 241, 241);
+	--background-hover-color: rgb(130 130 130 / 28%);
+}
+
+[data-theme="dark"] .window-contextmenu-item.error,
+[data-theme="dark"] .window-task-bar-contextmenu-item.error {
+	--font-color: #ff6575;
+	--background-color: none;
+	--font-hover-color: #fff;
+	--background-hover-color: #dc3545;
+}
+
+.window-desktop {
+	width: 100%;
+	height: 100%;
+}
+
+.window-contextmenu-item.disabled,
+.window-task-bar-contextmenu-item.disabled {
+	pointer-events: none;
+	opacity: .3;
 }

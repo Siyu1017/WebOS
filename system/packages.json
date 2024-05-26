@@ -144,6 +144,14 @@
         "version": "1.0.0"
     },
     {
+        "name": "Virus - Death",
+        "author": "WebOS, Siyu1017",
+        "scripts": [
+            "packages/virus-death/app"
+        ],
+        "version": "1.0.0"
+    },
+    {
         "name": "Restart",
         "author": "WebOS, Siyu1017",
         "scripts": [
